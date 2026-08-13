@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt Hàng - ShopDirect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+    
+    <div id="navbarContainer"></div>
+
+    <main class="flex-1 container mx-auto px-4 py-6">
+        
+<div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3 flex items-center gap-2">
+        <i class="fa-solid fa-file-invoice-dollar text-indigo-600"></i> Đặt Hàng & Thanh Toán Trực Tiếp
+    </h1>
+
+    <form id="checkoutForm" onsubmit="handleCheckout(event)" class="space-y-6">
+        <div>
+            <h3 class="font-bold text-gray-800 text-sm uppercase mb-3 text-indigo-600">1. Thông tin giao hàng</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Họ và tên *</label>
+                    <input type="text" id="custName" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Số điện thoại *</label>
+                    <input type="tel" id="custPhone" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Địa chỉ nhận hàng *</label>
+                    <input type="text" id="custAddress" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="font-bold text-gray-800 text-sm uppercase mb-3 text-indigo-600">2. Phương thức thanh toán</h3>
+            <div class="space-y-3">
+                <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-indigo-50 transition">
+                    <input type="radio" name="payMethod" value="COD" checked onclick="toggleQR(false)" class="text-indigo-600">
+                    <div>
+                        <p class="font-bold text-sm">Thanh toán trực tiếp khi nhận hàng (COD)</p>
+                        <p class="text-xs text-gray-500">Trả tiền mặt trực tiếp cho người giao hàng</p>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-indigo-50 transition">
+                    <input type="radio" name="payMethod" value="BANK" onclick="toggleQR(true)" class="text-indigo-600">
+                    <div>
+                        <p class="font-bold text-sm">Chuyển khoản trực tiếp (QR Code Ngân Hàng)</p>
+                        <p class="text-xs text-gray-500">Quét mã QR thanh toán nhanh chóng</p>
+                    </div>
+                </label>
+            </div>
+
+            <div id="qrArea" class="hidden mt-4 p-4 bg-gray-50 border rounded-xl text-center">
+                <p class="text-xs font-semibold text-gray-600 mb-2">Quét mã QR bằng app Ngân hàng để thanh toán:</p>
+                <img id="qrImg" src="" alt="QR Pay" class="w-44 h-44 mx-auto rounded-lg border shadow-sm">
+                <p class="text-xs text-gray-500 mt-2">Cú pháp chuyển khoản: <span id="qrMemo" class="font-bold text-indigo-600"></span></p>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="font-bold text-gray-800 text-sm uppercase mb-3 text-indigo-600">3. Tóm tắt đơn hàng</h3>
+            <div id="checkoutSummary" class="space-y-2 text-sm bg-gray-50 p-4 rounded-xl border"></div>
+        </div>
+
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-lg transition shadow">
+            Xác nhận đặt hàng
+        </button>
+    </form>
+</div>
+
+    </main>
+
+    <div id="footerContainer"></div>
+
+    <script src="../js/data-store.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/checkout.js"></script>
+</body>
+</html>

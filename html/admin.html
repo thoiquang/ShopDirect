@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Quản Trị - ShopDirect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+    
+    <div id="navbarContainer"></div>
+
+    <main class="flex-1 container mx-auto px-4 py-6">
+        
+<div class="space-y-6">
+    <div class="flex justify-between items-center border-b pb-4">
+        <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <i class="fa-solid fa-chart-line text-purple-600"></i> Trang Quản Trị Hệ Thống (Admin Dashboard)
+        </h1>
+    </div>
+
+    <!-- Thống kê -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white p-5 rounded-xl border shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-sack-dollar"></i></div>
+            <div><p class="text-xs text-gray-500 uppercase font-bold">Doanh Thu</p><h3 id="admRevenue" class="text-xl font-extrabold">0 đ</h3></div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-boxes-packing"></i></div>
+            <div><p class="text-xs text-gray-500 uppercase font-bold">Đơn Hàng</p><h3 id="admOrdersCount" class="text-xl font-extrabold">0</h3></div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-layer-group"></i></div>
+            <div><p class="text-xs text-gray-500 uppercase font-bold">Sản Phẩm</p><h3 id="admProductsCount" class="text-xl font-extrabold">0</h3></div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-users"></i></div>
+            <div><p class="text-xs text-gray-500 uppercase font-bold">Khách Hàng</p><h3 id="admUsersCount" class="text-xl font-extrabold">0</h3></div>
+        </div>
+    </div>
+
+    <!-- Quản lý đơn hàng -->
+    <div class="bg-white p-6 rounded-xl border shadow-sm">
+        <h2 class="font-bold text-gray-800 text-lg mb-4">Danh Sách Đơn Hàng</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm text-gray-600">
+                <thead class="bg-gray-50 text-gray-700 uppercase border-b">
+                    <tr>
+                        <th class="py-3 px-4">Mã ĐH</th>
+                        <th class="py-3 px-4">Khách hàng</th>
+                        <th class="py-3 px-4">Hình thức</th>
+                        <th class="py-3 px-4">Tổng tiền</th>
+                        <th class="py-3 px-4">Ngày đặt</th>
+                    </tr>
+                </thead>
+                <tbody id="admOrdersTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <div id="footerContainer"></div>
+
+    <script src="../js/data-store.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>

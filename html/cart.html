@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ Hàng - ShopDirect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+    
+    <div id="navbarContainer"></div>
+
+    <main class="flex-1 container mx-auto px-4 py-6">
+        
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <i class="fa-solid fa-cart-shopping text-indigo-600"></i> Giỏ Hàng Của Bạn
+    </h1>
+
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <div id="cartTableContainer" class="space-y-4"></div>
+
+        <div class="mt-6 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
+            <a href="home.html" class="text-sm text-indigo-600 font-semibold hover:underline">
+                <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sắm
+            </a>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-xs text-gray-500">Tổng cộng thanh toán:</p>
+                    <p id="cartTotalSum" class="text-2xl font-extrabold text-indigo-600">0 đ</p>
+                </div>
+                <a href="checkout.html" id="checkoutBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg transition shadow">
+                    Thanh toán ngay
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <div id="footerContainer"></div>
+
+    <script src="../js/data-store.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/cart.js"></script>
+</body>
+</html>

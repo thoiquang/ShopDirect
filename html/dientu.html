@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiết Bị Điện Tử - ShopDirect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+    
+    <div id="navbarContainer"></div>
+
+    <main class="flex-1 container mx-auto px-4 py-6">
+        
+    <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4 mb-6 rounded-r-lg">
+        <h1 class="text-2xl font-bold text-indigo-900">Thiết Bị Điện Tử</h1>
+        <p class="text-xs text-indigo-700 mt-1">Danh mục sản phẩm chính hãng thuộc nhóm Thiết Bị Điện Tử</p>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Danh sách sản phẩm</h2>
+        <span id="productCount" class="text-sm text-gray-500">Hiển thị 0 sản phẩm</span>
+    </div>
+
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    
+    </main>
+
+    <div id="footerContainer"></div>
+
+    <script src="../js/data-store.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/dientu.js"></script>
+</body>
+</html>
