@@ -1,0 +1,9 @@
+D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.csproj.AssemblyReference.cache
+D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\rpswa.dswa.cache.json
+D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.GeneratedMSBuildEditorConfig.editorconfig
+D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.AssemblyInfoInputs.cache
+D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.AssemblyInfo.cs
+D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.csproj.CoreCompileInputs.cache
+D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.MvcApplicationPartsAssemblyInfo.cs
+D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.MvcApplicationPartsAssemblyInfo.cache
+D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.sourcelink.json

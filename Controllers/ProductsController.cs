@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ShopDirectBackend.Data;
 
 namespace ShopDirectBackend.Controllers
 {
@@ -14,7 +15,7 @@ namespace ShopDirectBackend.Controllers
             _context = context;
         }
 
-        // GET: api/products (Lấy tất cả sản phẩm)
+        // GET: api/products
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
@@ -22,14 +23,13 @@ namespace ShopDirectBackend.Controllers
             return Ok(products);
         }
 
-        // GET: api/products/category/dientu (Lấy sản phẩm theo danh mục)
-        [HttpGet("category/{categoryCode}")]
-        public async Task<IActionResult> GetByCategory(string categoryCode)
+        // GET: api/products/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProductById(int id)
         {
-            var products = await _context.Products
-                .Where(p => p.CategoryCode == categoryCode)
-                .ToListAsync();
-            return Ok(products);
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return NotFound();
+            return Ok(product);
         }
     }
 }
