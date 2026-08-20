@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopDirectBackend.Data;
+using ShopDirectBackend.Models;
 
 namespace ShopDirectBackend.Controllers
 {
@@ -15,7 +16,6 @@ namespace ShopDirectBackend.Controllers
             _context = context;
         }
 
-        // GET: api/products
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
@@ -23,13 +23,46 @@ namespace ShopDirectBackend.Controllers
             return Ok(products);
         }
 
-        // GET: api/products/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
             var product = await _context.Products.FindAsync(id);
             if (product == null) return NotFound();
             return Ok(product);
+        }
+
+        [HttpGet("category/{categoryCode}")]
+        public async Task<IActionResult> GetByCategory(string categoryCode)
+        {
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(c => c.CategoryCode == categoryCode);
+
+            if (category == null) return Ok(new List<Product>());
+
+            var products = await _context.Products
+                .Where(p => p.CategoryId == category.CategoryId)
+                .ToListAsync();
+
+            return Ok(products);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct([FromBody] Product product)
+        {
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+            return Ok(product);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return NotFound();
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+            return Ok();
         }
     }
 }
