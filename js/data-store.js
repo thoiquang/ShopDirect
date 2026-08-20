@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://localhost:7122/api";
+const API_BASE_URL = "https://localhost:5025/api";
 
 const DataStore = {
     getProducts: async function() {
