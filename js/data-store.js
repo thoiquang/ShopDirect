@@ -1,9 +1,10 @@
-const API_BASE_URL = "https://localhost:7283/api";
+const API_BASE_URL = "https://localhost:7122/api";
 
 const DataStore = {
     getProducts: async function() {
         try {
             const res = await fetch(`${API_BASE_URL}/products`);
+            if (!res.ok) return [];
             return await res.json();
         } catch (e) {
             return [];
@@ -23,6 +24,7 @@ const DataStore = {
     getProductsByCategory: async function(categoryCode) {
         try {
             const res = await fetch(`${API_BASE_URL}/products/category/${categoryCode}`);
+            if (!res.ok) return [];
             return await res.json();
         } catch (e) {
             return [];
@@ -55,18 +57,30 @@ const DataStore = {
         return await res.json();
     },
 
+    getUsers: async function() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/auth/users`);
+            if (!res.ok) return [];
+            return await res.json();
+        } catch (e) {
+            return [];
+        }
+    },
+
     createOrder: async function(orderPayload) {
         const res = await fetch(`${API_BASE_URL}/orders`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderPayload)
         });
+        if (!res.ok) throw new Error('Không thể tạo đơn hàng');
         return await res.json();
     },
 
     getOrders: async function() {
         try {
             const res = await fetch(`${API_BASE_URL}/orders`);
+            if (!res.ok) return [];
             return await res.json();
         } catch (e) {
             return [];
@@ -76,6 +90,7 @@ const DataStore = {
     getStats: async function() {
         try {
             const res = await fetch(`${API_BASE_URL}/orders/stats`);
+            if (!res.ok) return { revenue: 0, ordersCount: 0, productsCount: 0, usersCount: 0 };
             return await res.json();
         } catch (e) {
             return { revenue: 0, ordersCount: 0, productsCount: 0, usersCount: 0 };

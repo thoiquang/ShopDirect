@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
     const cart = DataStore.getCart();
     if (cart.length === 0) {
@@ -26,7 +25,7 @@ function renderCheckoutSummary() {
         total += itemTotal;
         const row = document.createElement("div");
         row.className = "flex justify-between text-gray-700 text-xs sm:text-sm";
-        row.innerHTML = `<span>${item.name} x${item.quantity}</span><span class="font-bold">${itemTotal.toLocaleString('vi-VN')} đ</span>`;
+        row.innerHTML = `<span>${item.productName} x${item.quantity}</span><span class="font-bold">${itemTotal.toLocaleString('vi-VN')} đ</span>`;
         container.appendChild(row);
     });
 
@@ -46,7 +45,7 @@ function toggleQR(show) {
     else qrArea.classList.add("hidden");
 }
 
-function handleCheckout(e) {
+async function handleCheckout(e) {
     e.preventDefault();
     const cart = DataStore.getCart();
     const name = document.getElementById("custName").value;
@@ -55,20 +54,25 @@ function handleCheckout(e) {
     const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    const newOrder = {
-        orderId: "HD" + Date.now().toString().slice(-6),
-        customer: { name, phone, address },
-        items: cart,
-        total: total,
+    const orderPayload = {
+        customerName: name,
+        customerPhone: phone,
+        customerAddress: address,
+        totalAmount: total,
         paymentMethod: payMethod === 'COD' ? 'Thanh toán COD' : 'Chuyển khoản QR',
-        createdAt: new Date().toLocaleString('vi-VN')
+        items: cart.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: item.price
+        }))
     };
 
-    const orders = DataStore.getOrders();
-    orders.push(newOrder);
-    DataStore.saveOrders(orders);
-
-    DataStore.saveCart([]);
-    alert(`Đặt hàng thành công! Mã đơn hàng của bạn là: ${newOrder.orderId}`);
-    window.location.href = "home.html";
+    try {
+        const orderResult = await DataStore.createOrder(orderPayload);
+        DataStore.saveCart([]);
+        alert(`Đặt hàng thành công! Mã đơn hàng của bạn là: ${orderResult.orderCode}`);
+        window.location.href = "home.html";
+    } catch (error) {
+        alert("Lỗi tạo đơn hàng: " + error.message);
+    }
 }

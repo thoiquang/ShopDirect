@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ShopDirectBackend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c84e7ebe0dd733e54dc3c9ffac7fc58bb09f8abc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a17873d2f41006e7f27796f8ecfdf1032fe874bf")]
 [assembly: System.Reflection.AssemblyProductAttribute("ShopDirectBackend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ShopDirectBackend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,4 +1,4 @@
-namespace ShopDrireBackend.Models
+namespace ShopDirectBackend.Models
 {
     public class Category
     {

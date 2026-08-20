@@ -1,35 +1,80 @@
-
 document.addEventListener("DOMContentLoaded", () => {
-    const user = DataStore.getCurrentUser();
-    if (!user || user.role !== 'admin') {
-        alert("Bạn cần đăng nhập bằng tài khoản Admin để truy cập!");
-        window.location.href = "login.html";
+    renderCart();
+});
+
+function renderCart() {
+    const cart = DataStore.getCart();
+    const container = document.getElementById("cartTableContainer");
+    const totalSumElem = document.getElementById("cartTotalSum");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+
+    if (cart.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-12 text-gray-400">
+                <i class="fa-solid fa-basket-shopping text-5xl mb-3"></i>
+                <p class="font-medium">Giỏ hàng của bạn đang trống</p>
+            </div>
+        `;
+        totalSumElem.innerText = "0 đ";
+        checkoutBtn.classList.add("pointer-events-none", "opacity-50");
         return;
     }
 
-    const orders = DataStore.getOrders();
-    const products = DataStore.getProducts();
-    const users = DataStore.getUsers();
+    checkoutBtn.classList.remove("pointer-events-none", "opacity-50");
+    container.innerHTML = "";
+    let total = 0;
 
-    const revenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+    cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
 
-    document.getElementById("admRevenue").innerText = `${revenue.toLocaleString('vi-VN')} đ`;
-    document.getElementById("admOrdersCount").innerText = orders.length;
-    document.getElementById("admProductsCount").innerText = products.length;
-    document.getElementById("admUsersCount").innerText = users.length;
-
-    const table = document.getElementById("admOrdersTable");
-    table.innerHTML = "";
-    orders.reverse().forEach(o => {
-        const tr = document.createElement("tr");
-        tr.className = "border-b hover:bg-gray-50";
-        tr.innerHTML = `
-            <td class="py-3 px-4 font-bold text-indigo-600">${o.orderId}</td>
-            <td class="py-3 px-4 font-semibold">${o.customer.name} (${o.customer.phone})</td>
-            <td class="py-3 px-4 text-xs">${o.paymentMethod}</td>
-            <td class="py-3 px-4 font-bold">${o.total.toLocaleString('vi-VN')} đ</td>
-            <td class="py-3 px-4 text-xs">${o.createdAt}</td>
+        const row = document.createElement("div");
+        row.className = "flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border";
+        row.innerHTML = `
+            <div class="flex items-center gap-4 w-full sm:w-auto">
+                <img src="${item.imageUrl}" alt="${item.productName}" class="w-16 h-16 object-cover rounded-lg border">
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">${item.productName}</h3>
+                    <p class="text-indigo-600 font-bold text-sm">${item.price.toLocaleString('vi-VN')} đ</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6 justify-between w-full sm:w-auto">
+                <div class="flex items-center gap-2 border bg-white rounded-lg px-2 py-1">
+                    <button onclick="changeQty(${item.productId}, -1)" class="text-gray-500 hover:text-indigo-600 font-bold px-1">-</button>
+                    <span class="font-bold text-sm px-2">${item.quantity}</span>
+                    <button onclick="changeQty(${item.productId}, 1)" class="text-gray-500 hover:text-indigo-600 font-bold px-1">+</button>
+                </div>
+                <p class="font-extrabold text-gray-800 text-sm min-w-[100px] text-right">${itemTotal.toLocaleString('vi-VN')} đ</p>
+                <button onclick="removeItem(${item.productId})" class="text-red-500 hover:text-red-700 p-1">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
         `;
-        table.appendChild(tr);
+        container.appendChild(row);
     });
-});
+
+    totalSumElem.innerText = `${total.toLocaleString('vi-VN')} đ`;
+}
+
+function changeQty(productId, delta) {
+    const cart = DataStore.getCart();
+    const item = cart.find(i => i.productId === productId);
+    if (item) {
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+            removeItem(productId);
+            return;
+        }
+        DataStore.saveCart(cart);
+        renderCart();
+        updateCartBadge();
+    }
+}
+
+function removeItem(productId) {
+    let cart = DataStore.getCart();
+    cart = cart.filter(i => i.productId !== productId);
+    DataStore.saveCart(cart);
+    renderCart();
+    updateCartBadge();
+}
