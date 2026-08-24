@@ -1,78 +1,98 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const cart = DataStore.getCart();
-    if (cart.length === 0) {
-        alert("Giỏ hàng đang trống!");
-        window.location.href = "home.html";
-        return;
-    }
-
-    const user = DataStore.getCurrentUser();
-    if (user) {
-        document.getElementById("custName").value = user.name || "";
-    }
-
     renderCheckoutSummary();
+
+    const form = document.getElementById("checkoutForm");
+    if (form) {
+        form.addEventListener("submit", handleCheckoutSubmit);
+    }
 });
 
 function renderCheckoutSummary() {
     const cart = DataStore.getCart();
-    const container = document.getElementById("checkoutSummary");
-    let total = 0;
+    const itemsList = document.getElementById("checkoutItemsList");
+    const subtotalEl = document.getElementById("checkoutSubtotal");
+    const shippingEl = document.getElementById("checkoutShipping");
+    const totalEl = document.getElementById("checkoutTotal");
 
-    container.innerHTML = "";
+    if (!itemsList) return;
+
+    if (cart.length === 0) {
+        alert("Giỏ hàng của bạn đang trống! Vui lòng chọn sản phẩm trước khi thanh toán.");
+        window.location.href = "home.html";
+        return;
+    }
+
+    itemsList.innerHTML = "";
+    let subtotal = 0;
+
     cart.forEach(item => {
         const itemTotal = item.price * item.quantity;
-        total += itemTotal;
+        subtotal += itemTotal;
+
         const row = document.createElement("div");
-        row.className = "flex justify-between text-gray-700 text-xs sm:text-sm";
-        row.innerHTML = `<span>${item.productName} x${item.quantity}</span><span class="font-bold">${itemTotal.toLocaleString('vi-VN')} đ</span>`;
-        container.appendChild(row);
+        row.className = "flex items-center justify-between text-sm py-2 border-b border-gray-100";
+        row.innerHTML = `
+            <div class="flex items-center gap-3">
+                <img src="${item.imageUrl}" class="w-10 h-10 object-cover rounded-lg border">
+                <div>
+                    <p class="font-semibold text-gray-800 line-clamp-1">${item.productName}</p>
+                    <p class="text-xs text-gray-500">Số lượng: ${item.quantity}</p>
+                </div>
+            </div>
+            <span class="font-bold text-gray-700">${Number(itemTotal).toLocaleString('vi-VN')} đ</span>
+        `;
+        itemsList.appendChild(row);
     });
 
-    const totalRow = document.createElement("div");
-    totalRow.className = "flex justify-between font-extrabold text-base text-indigo-600 pt-2 border-t mt-2";
-    totalRow.innerHTML = `<span>Tổng tiền:</span><span>${total.toLocaleString('vi-VN')} đ</span>`;
-    container.appendChild(totalRow);
+    const shipping = subtotal > 500000 ? 0 : 30000;
+    const total = subtotal + shipping;
 
-    const memo = "SD" + Math.floor(100000 + Math.random() * 900000);
-    document.getElementById("qrMemo").innerText = memo;
-    document.getElementById("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://shopdirect.vn/pay?amount=${total}%26memo=${memo}`;
+    if (subtotalEl) subtotalEl.innerText = `${Number(subtotal).toLocaleString('vi-VN')} đ`;
+    if (shippingEl) shippingEl.innerText = shipping === 0 ? "Miễn phí" : `${Number(shipping).toLocaleString('vi-VN')} đ`;
+    if (totalEl) totalEl.innerText = `${Number(total).toLocaleString('vi-VN')} đ`;
 }
 
-function toggleQR(show) {
-    const qrArea = document.getElementById("qrArea");
-    if (show) qrArea.classList.remove("hidden");
-    else qrArea.classList.add("hidden");
-}
-
-async function handleCheckout(e) {
+async function handleCheckoutSubmit(e) {
     e.preventDefault();
+
     const cart = DataStore.getCart();
-    const name = document.getElementById("custName").value;
-    const phone = document.getElementById("custPhone").value;
-    const address = document.getElementById("custAddress").value;
-    const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    if (cart.length === 0) return;
+
+    const fullName = document.getElementById("custName").value.trim();
+    const phone = document.getElementById("custPhone").value.trim();
+    const address = document.getElementById("custAddress").value.trim();
+    const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || "COD";
+
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shipping = subtotal > 500000 ? 0 : 30000;
+    const totalAmount = subtotal + shipping;
 
     const orderPayload = {
-        customerName: name,
+        customerName: fullName,
         customerPhone: phone,
         customerAddress: address,
-        totalAmount: total,
-        paymentMethod: payMethod === 'COD' ? 'Thanh toán COD' : 'Chuyển khoản QR',
-        items: cart.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: item.price
-        }))
+        totalAmount: totalAmount,
+        paymentMethod: paymentMethod === "COD" ? "Thanh toán khi nhận hàng (COD)" : "Chuyển khoản Ngân hàng / QR"
     };
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Đang xử lý đơn hàng...";
+    }
+
     try {
-        const orderResult = await DataStore.createOrder(orderPayload);
-        DataStore.saveCart([]);
-        alert(`Đặt hàng thành công! Mã đơn hàng của bạn là: ${orderResult.orderCode}`);
+        const result = await DataStore.createOrder(orderPayload);
+        DataStore.saveCart([]); // Xóa giỏ hàng sau khi đặt thành công
+        updateCartBadge();
+
+        alert(`🎉 Đặt hàng thành công!\nMã đơn hàng: ${result.orderCode || result.orderId}\nCảm ơn bạn đã mua sắm tại ShopDirect!`);
         window.location.href = "home.html";
-    } catch (error) {
-        alert("Lỗi tạo đơn hàng: " + error.message);
+    } catch (err) {
+        alert("Có lỗi xảy ra khi tạo đơn hàng, vui lòng thử lại!");
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Xác nhận đặt hàng";
+        }
     }
 }

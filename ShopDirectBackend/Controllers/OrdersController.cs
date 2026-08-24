@@ -21,72 +21,76 @@ namespace ShopDirectBackend.Controllers
         {
             var orders = await _context.Orders
                 .OrderByDescending(o => o.CreatedAt)
+                .Select(o => new
+                {
+                    o.OrderId,
+                    o.OrderCode,
+                    o.CustomerName,
+                    o.CustomerPhone,
+                    o.CustomerAddress,
+                    o.TotalAmount,
+                    o.PaymentMethod,
+                    OrderStatus = o.Status ?? "Chờ xử lý",
+                    o.CreatedAt
+                })
                 .ToListAsync();
+
             return Ok(orders);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderRequest request)
+        public async Task<IActionResult> CreateOrder([FromBody] Order orderPayload)
         {
-            var order = new Order
+            if (string.IsNullOrWhiteSpace(orderPayload.OrderCode))
             {
-                OrderCode = "HD" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()[^6..],
-                CustomerName = request.CustomerName,
-                CustomerPhone = request.CustomerPhone,
-                CustomerAddress = request.CustomerAddress,
-                TotalAmount = request.TotalAmount,
-                PaymentMethod = request.PaymentMethod,
-                CreatedAt = DateTime.Now
-            };
-
-            foreach (var item in request.Items)
-            {
-                order.OrderDetails.Add(new OrderDetail
-                {
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice
-                });
+                orderPayload.OrderCode = "HD" + DateTime.Now.ToString("yyMMddHHmmss");
             }
+            orderPayload.CreatedAt = DateTime.Now;
+            orderPayload.Status = "Chờ xử lý";
 
-            _context.Orders.Add(order);
+            _context.Orders.Add(orderPayload);
             await _context.SaveChangesAsync();
 
-            return Ok(order);
+            return Ok(new
+            {
+                orderPayload.OrderId,
+                orderPayload.OrderCode,
+                orderPayload.CustomerName,
+                orderPayload.CustomerPhone,
+                orderPayload.CustomerAddress,
+                orderPayload.TotalAmount,
+                orderPayload.PaymentMethod,
+                orderPayload.Status,
+                orderPayload.CreatedAt
+            });
+        }
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] string status)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null) return NotFound(new { message = "Không tìm thấy đơn hàng!" });
+
+            order.Status = status;
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Cập nhật trạng thái thành công!", status = order.Status });
         }
 
         [HttpGet("stats")]
-        public async Task<IActionResult> GetDashboardStats()
+        public async Task<IActionResult> GetStats()
         {
             var totalRevenue = await _context.Orders.SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
-            var totalOrders = await _context.Orders.CountAsync();
-            var totalProducts = await _context.Products.CountAsync();
-            var totalUsers = await _context.Users.CountAsync();
+            var ordersCount = await _context.Orders.CountAsync();
+            var productsCount = await _context.Products.CountAsync();
+            var usersCount = await _context.Users.CountAsync();
 
             return Ok(new
             {
                 revenue = totalRevenue,
-                ordersCount = totalOrders,
-                productsCount = totalProducts,
-                usersCount = totalUsers
+                ordersCount,
+                productsCount,
+                usersCount
             });
         }
-    }
-
-    public class OrderRequest
-    {
-        public string CustomerName { get; set; } = string.Empty;
-        public string CustomerPhone { get; set; } = string.Empty;
-        public string CustomerAddress { get; set; } = string.Empty;
-        public decimal TotalAmount { get; set; }
-        public string PaymentMethod { get; set; } = string.Empty;
-        public List<OrderItemRequest> Items { get; set; } = new();
-    }
-
-    public class OrderItemRequest
-    {
-        public int ProductId { get; set; }
-        public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
     }
 }

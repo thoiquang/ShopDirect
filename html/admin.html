@@ -3,70 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Quản Trị - ShopDirect</title>
+    <title>Bảng Điều Khiển Quản Trị - ShopDirect Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
-    
-    <div id="navbarContainer"></div>
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
 
-    <main class="flex-1 container mx-auto px-4 py-6">
-        
-<div class="space-y-6">
-    <div class="flex justify-between items-center border-b pb-4">
-        <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <i class="fa-solid fa-chart-line text-purple-600"></i> Trang Quản Trị Hệ Thống (Admin Dashboard)
-        </h1>
+    <!-- Top Admin Header -->
+    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg border-b border-slate-800">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="home.html" class="text-xl font-bold tracking-wide flex items-center gap-2 text-indigo-400 hover:text-indigo-300">
+                    <i class="fa-solid fa-store"></i>
+                    <span>ShopDirect</span>
+                </a>
+                <span class="bg-indigo-600 text-white text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Admin Panel</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p id="adminDisplayName" class="text-sm font-bold text-gray-200">Quản trị viên</p>
+                    <p class="text-[11px] text-indigo-400">admin@shopdirect.vn</p>
+                </div>
+                <a href="home.html" class="bg-slate-800 hover:bg-slate-700 text-gray-300 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700">
+                    <i class="fa-solid fa-arrow-left"></i> Về cửa hàng
+                </a>
+                <button onclick="logoutUser()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6 flex-1">
+        <!-- Navigation Tabs -->
+        <div class="flex flex-wrap gap-2 border-b border-gray-200 pb-3 mb-6">
+            <button id="tabBtn_overview" onclick="switchAdminTab('overview')" class="px-4 py-2 rounded-lg font-bold text-sm bg-indigo-600 text-white shadow transition flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie"></i> Tổng quan
+            </button>
+            <button id="tabBtn_products" onclick="switchAdminTab('products')" class="px-4 py-2 rounded-lg font-semibold text-sm bg-white text-gray-600 hover:bg-gray-50 border transition flex items-center gap-2">
+                <i class="fa-solid fa-box-open"></i> Quản lý sản phẩm
+            </button>
+            <button id="tabBtn_orders" onclick="switchAdminTab('orders')" class="px-4 py-2 rounded-lg font-semibold text-sm bg-white text-gray-600 hover:bg-gray-50 border transition flex items-center gap-2">
+                <i class="fa-solid fa-receipt"></i> Quản lý đơn hàng
+            </button>
+            <button id="tabBtn_users" onclick="switchAdminTab('users')" class="px-4 py-2 rounded-lg font-semibold text-sm bg-white text-gray-600 hover:bg-gray-50 border transition flex items-center gap-2">
+                <i class="fa-solid fa-users-gear"></i> Quản lý tài khoản
+            </button>
+        </div>
+
+        <!-- SECTION 1: TỔNG QUAN -->
+        <div id="sec_overview" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+                        <i class="fa-solid fa-sack-dollar"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Doanh Thu</p>
+                        <h3 id="admRevenue" class="text-2xl font-extrabold text-gray-800 mt-0.5">0 đ</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+                        <i class="fa-solid fa-boxes-packing"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Đơn Hàng</p>
+                        <h3 id="admOrdersCount" class="text-2xl font-extrabold text-gray-800 mt-0.5">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Sản Phẩm</p>
+                        <h3 id="admProductsCount" class="text-2xl font-extrabold text-gray-800 mt-0.5">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Khách Hàng</p>
+                        <h3 id="admUsersCount" class="text-2xl font-extrabold text-gray-800 mt-0.5">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Đơn hàng vừa phát sinh
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-xs uppercase text-gray-700 border-b">
+                            <tr>
+                                <th class="py-3 px-4">Mã ĐH</th>
+                                <th class="py-3 px-4">Khách hàng</th>
+                                <th class="py-3 px-4">Hình thức</th>
+                                <th class="py-3 px-4">Tổng tiền</th>
+                                <th class="py-3 px-4">Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: QUẢN LÝ SẢN PHẨM -->
+        <div id="sec_products" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-lg">Danh Sách Sản Phẩm</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Quản lý thêm, sửa giá bán và xóa sản phẩm trong hệ thống</p>
+                    </div>
+                    <button onclick="openProductModal('add')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Thêm sản phẩm mới
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-xs uppercase text-gray-700 border-b">
+                            <tr>
+                                <th class="py-3 px-4">Hình ảnh</th>
+                                <th class="py-3 px-4">Tên sản phẩm</th>
+                                <th class="py-3 px-4">Danh mục</th>
+                                <th class="py-3 px-4">Giá bán</th>
+                                <th class="py-3 px-4 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: QUẢN LÝ ĐƠN HÀNG -->
+        <div id="sec_orders" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-lg">Tất Cả Đơn Hàng</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Cập nhật tiến độ giao dịch và trạng thái vận chuyển</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-xs uppercase text-gray-700 border-b">
+                            <tr>
+                                <th class="py-3 px-4">Mã ĐH</th>
+                                <th class="py-3 px-4">Khách hàng / SĐT</th>
+                                <th class="py-3 px-4">Địa chỉ giao hàng</th>
+                                <th class="py-3 px-4">Phương thức</th>
+                                <th class="py-3 px-4">Tổng tiền</th>
+                                <th class="py-3 px-4">Trạng thái</th>
+                                <th class="py-3 px-4 text-center">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: QUẢN LÝ KHÁCH HÀNG -->
+        <div id="sec_users" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                <h3 class="font-bold text-gray-800 text-lg mb-4">Danh Sách Tài Khoản Người Dùng</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-xs uppercase text-gray-700 border-b">
+                            <tr>
+                                <th class="py-3 px-4">Mã ID</th>
+                                <th class="py-3 px-4">Họ và tên</th>
+                                <th class="py-3 px-4">Email</th>
+                                <th class="py-3 px-4">Vai trò</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Thống kê -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white p-5 rounded-xl border shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-sack-dollar"></i></div>
-            <div><p class="text-xs text-gray-500 uppercase font-bold">Doanh Thu</p><h3 id="admRevenue" class="text-xl font-extrabold">0 đ</h3></div>
-        </div>
-        <div class="bg-white p-5 rounded-xl border shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-boxes-packing"></i></div>
-            <div><p class="text-xs text-gray-500 uppercase font-bold">Đơn Hàng</p><h3 id="admOrdersCount" class="text-xl font-extrabold">0</h3></div>
-        </div>
-        <div class="bg-white p-5 rounded-xl border shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-layer-group"></i></div>
-            <div><p class="text-xs text-gray-500 uppercase font-bold">Sản Phẩm</p><h3 id="admProductsCount" class="text-xl font-extrabold">0</h3></div>
-        </div>
-        <div class="bg-white p-5 rounded-xl border shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-users"></i></div>
-            <div><p class="text-xs text-gray-500 uppercase font-bold">Khách Hàng</p><h3 id="admUsersCount" class="text-xl font-extrabold">0</h3></div>
+    <!-- MODAL THÊM / CHỈNH SỬA SẢN PHẨM -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div onclick="closeProductModal()" class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 z-10 relative shadow-2xl">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <h3 id="productModalTitle" class="text-xl font-bold text-gray-800 mb-4">Thêm Sản Phẩm Mới</h3>
+            <form onsubmit="handleSaveProduct(event)" class="space-y-4">
+                <input type="hidden" id="editProdId">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tên sản phẩm *</label>
+                    <input type="text" id="modalProdName" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Danh mục *</label>
+                        <select id="modalProdCategory" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="1">Thiết bị điện tử</option>
+                            <option value="2">Thời trang & Phụ kiện</option>
+                            <option value="3">Đồ gia dụng</option>
+                            <option value="4">Sách & Văn phòng phẩm</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Giá bán (VNĐ) *</label>
+                        <input type="number" id="modalProdPrice" required min="1000" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Link URL hình ảnh *</label>
+                    <input type="url" id="modalProdImage" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://images.unsplash.com/...">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Mô tả sản phẩm</label>
+                    <textarea id="modalProdDesc" rows="3" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Nhập thông số, đặc điểm sản phẩm..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition shadow">
+                    Lưu dữ liệu
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- Quản lý đơn hàng -->
-    <div class="bg-white p-6 rounded-xl border shadow-sm">
-        <h2 class="font-bold text-gray-800 text-lg mb-4">Danh Sách Đơn Hàng</h2>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs sm:text-sm text-gray-600">
-                <thead class="bg-gray-50 text-gray-700 uppercase border-b">
-                    <tr>
-                        <th class="py-3 px-4">Mã ĐH</th>
-                        <th class="py-3 px-4">Khách hàng</th>
-                        <th class="py-3 px-4">Hình thức</th>
-                        <th class="py-3 px-4">Tổng tiền</th>
-                        <th class="py-3 px-4">Ngày đặt</th>
-                    </tr>
-                </thead>
-                <tbody id="admOrdersTable"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-    </main>
-
-    <div id="footerContainer"></div>
+    <footer class="bg-slate-900 text-gray-400 py-4 text-center text-xs border-t border-slate-800">
+        ShopDirect Admin Dashboard - Hệ Thống Quản Lý Thương Mại Điện Tử
+    </footer>
 
     <script src="../js/data-store.js"></script>
-    <script src="../js/navbar.js"></script>
     <script src="../js/admin.js"></script>
 </body>
 </html>

@@ -1,4 +1,3 @@
-// Rendering Navbar & Footer dùng chung cho các trang
 document.addEventListener("DOMContentLoaded", () => {
     renderNavbar();
     renderFooter();
@@ -27,36 +26,37 @@ function renderNavbar() {
 
             <div class="flex items-center space-x-6 text-sm">
                 ${currentUser ? `
-                    <div class="relative group">
-                        <button class="flex items-center gap-2 hover:text-indigo-200 focus:outline-none font-semibold">
-                            <i class="fa-regular fa-user text-lg"></i>
-                            <span class="hidden md:inline">${currentUser.name}</span>
+                    <div class="relative" id="userMenuWrapper">
+                        <button onclick="toggleUserDropdown(event)" class="flex items-center gap-2 hover:text-indigo-200 focus:outline-none font-semibold bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg transition">
+                            <i class="fa-solid fa-circle-user text-lg"></i>
+                            <span class="hidden md:inline">${currentUser.name || currentUser.fullName}</span>
+                            <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
                         </button>
-                        <div class="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-xl border py-2 hidden group-hover:block z-50">
-                            <div class="px-4 py-2 border-b">
-                                <p class="font-bold text-xs text-indigo-600">${currentUser.name}</p>
-                                <p class="text-[10px] text-gray-500 uppercase font-semibold">${currentUser.role === 'admin' ? 'Quản trị viên' : 'Khách hàng'}</p>
+                        <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-52 bg-white text-gray-800 rounded-xl shadow-2xl border py-2 z-50">
+                            <div class="px-4 py-2 border-b bg-gray-50">
+                                <p class="font-bold text-xs text-indigo-600 truncate">${currentUser.name || currentUser.fullName}</p>
+                                <p class="text-[11px] text-gray-500 uppercase font-semibold mt-0.5">${currentUser.role === 'admin' ? 'Quản trị viên (Admin)' : 'Khách hàng'}</p>
                             </div>
                             ${currentUser.role === 'admin' ? `
-                                <a href="admin.html" class="block px-4 py-2 text-xs text-purple-600 hover:bg-purple-50 font-bold border-b">
-                                    <i class="fa-solid fa-chart-line mr-1"></i> Trang Quản Trị
+                                <a href="admin.html" class="block px-4 py-2.5 text-xs text-purple-700 hover:bg-purple-50 font-bold border-b transition">
+                                    <i class="fa-solid fa-gauge-high mr-2 text-purple-600"></i> Trang Quản Trị
                                 </a>
                             ` : ''}
-                            <button onclick="logoutUser()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                            <button onclick="logoutUser()" class="w-full text-left px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2 transition font-medium">
                                 <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
                             </button>
                         </div>
                     </div>
                 ` : `
-                    <a href="login.html" class="flex items-center gap-1 hover:text-indigo-200 font-medium">
-                        <i class="fa-regular fa-user text-lg"></i>
+                    <a href="login.html" class="flex items-center gap-1.5 hover:text-indigo-200 font-medium bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg transition">
+                        <i class="fa-regular fa-user text-base"></i>
                         <span class="hidden md:inline">Đăng nhập / Đăng ký</span>
                     </a>
                 `}
 
-                <a href="cart.html" class="flex items-center gap-1 hover:text-indigo-200 relative focus:outline-none">
+                <a href="cart.html" class="flex items-center gap-1 hover:text-indigo-200 relative focus:outline-none p-1">
                     <i class="fa-solid fa-cart-shopping text-xl"></i>
-                    <span id="navCartCount" class="bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 absolute -top-2 -right-3">0</span>
+                    <span id="navCartCount" class="bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 absolute -top-1.5 -right-2">0</span>
                 </a>
             </div>
         </div>
@@ -74,6 +74,22 @@ function renderNavbar() {
     `;
 }
 
+function toggleUserDropdown(event) {
+    event.stopPropagation();
+    const menu = document.getElementById("userDropdownMenu");
+    if (menu) {
+        menu.classList.toggle("hidden");
+    }
+}
+
+document.addEventListener("click", (e) => {
+    const menuWrapper = document.getElementById("userMenuWrapper");
+    const menu = document.getElementById("userDropdownMenu");
+    if (menu && menuWrapper && !menuWrapper.contains(e.target)) {
+        menu.classList.add("hidden");
+    }
+});
+
 function renderFooter() {
     const footerContainer = document.getElementById("footerContainer");
     if (!footerContainer) return;
@@ -82,7 +98,7 @@ function renderFooter() {
     <footer class="bg-gray-800 text-gray-300 mt-12 py-8">
         <div class="container mx-auto px-4 text-center">
             <p class="font-semibold text-lg text-white">Hệ Thống Bán Hàng Trực Tiếp - ShopDirect</p>
-            <p class="text-sm text-gray-400 mt-1">Thiết kế hệ thống đa trang chuẩn kết nối Database SQL Server</p>
+            <p class="text-sm text-gray-400 mt-1">Đồ án Thương Mại Điện Tử - ASP.NET Core & SQL Server</p>
             <p class="text-xs text-gray-500 mt-3">© 2026 ShopDirect. All rights reserved.</p>
         </div>
     </footer>

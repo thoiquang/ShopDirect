@@ -64,5 +64,21 @@ namespace ShopDirectBackend.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product updatedProduct)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return NotFound();
+
+            product.ProductName = updatedProduct.ProductName;
+            product.Description = updatedProduct.Description;
+            product.Price = updatedProduct.Price;
+            product.ImageUrl = updatedProduct.ImageUrl;
+            product.CategoryId = updatedProduct.CategoryId;
+
+            await _context.SaveChangesAsync();
+            return Ok(product);
+        }
     }
 }
