@@ -1,4 +1,5 @@
-let currentProducts = [];
+let allProducts = [];
+let allOrders = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
     const user = DataStore.getCurrentUser();
@@ -17,7 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadUsersTable();
 });
 
-// Chuyển đổi Tab
+// Chuyển Tab
 function switchAdminTab(tab) {
     const tabs = ['overview', 'products', 'orders', 'users'];
     tabs.forEach(t => {
@@ -33,7 +34,7 @@ function switchAdminTab(tab) {
     });
 }
 
-// 1. Thống kê tổng quan
+// 1. Tổng quan
 async function loadOverviewStats() {
     const stats = await DataStore.getStats();
     const orders = await DataStore.getOrders();
@@ -65,13 +66,22 @@ async function loadOverviewStats() {
     });
 }
 
-// 2. Quản lý Sản phẩm
+// 2. Quản lý Sản phẩm & Bộ lọc
 async function loadProductsTable() {
-    currentProducts = await DataStore.getProducts();
+    allProducts = await DataStore.getProducts();
+    renderProducts(allProducts);
+}
+
+function renderProducts(items) {
     const table = document.getElementById("productsTableBody");
     table.innerHTML = "";
 
-    currentProducts.forEach(p => {
+    if (!items || items.length === 0) {
+        table.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-400">Không tìm thấy sản phẩm phù hợp</td></tr>`;
+        return;
+    }
+
+    items.forEach(p => {
         const tr = document.createElement("tr");
         tr.className = "border-b hover:bg-gray-50";
         tr.innerHTML = `
@@ -82,10 +92,10 @@ async function loadProductsTable() {
             <td class="py-2.5 px-4 text-xs font-bold text-indigo-600 uppercase">${p.categoryName || 'Sản phẩm'}</td>
             <td class="py-2.5 px-4 font-bold text-gray-800">${Number(p.price).toLocaleString('vi-VN')} đ</td>
             <td class="py-2.5 px-4 text-center space-x-2">
-                <button onclick="openProductModal('edit', ${p.productId})" class="text-blue-600 hover:text-blue-800 font-semibold text-xs px-2 py-1 bg-blue-50 rounded border border-blue-200">
+                <button onclick="openProductModal('edit', ${p.productId})" class="text-blue-600 hover:text-blue-800 font-semibold text-xs px-2.5 py-1 bg-blue-50 rounded border border-blue-200">
                     <i class="fa-solid fa-pen-to-square"></i> Sửa
                 </button>
-                <button onclick="deleteProductHandler(${p.productId})" class="text-red-600 hover:text-red-800 font-semibold text-xs px-2 py-1 bg-red-50 rounded border border-red-200">
+                <button onclick="deleteProductHandler(${p.productId})" class="text-red-600 hover:text-red-800 font-semibold text-xs px-2.5 py-1 bg-red-50 rounded border border-red-200">
                     <i class="fa-solid fa-trash"></i> Xóa
                 </button>
             </td>
@@ -94,14 +104,27 @@ async function loadProductsTable() {
     });
 }
 
+function filterProductsList() {
+    const searchVal = document.getElementById("searchProductInput").value.toLowerCase().trim();
+    const catVal = document.getElementById("filterProductCategory").value;
+
+    const filtered = allProducts.filter(p => {
+        const matchName = p.productName.toLowerCase().includes(searchVal);
+        const matchCat = (catVal === 'all') || (p.categoryId.toString() === catVal);
+        return matchName && matchCat;
+    });
+
+    renderProducts(filtered);
+}
+
 function openProductModal(mode, productId = null) {
     const modal = document.getElementById("productModal");
     const title = document.getElementById("productModalTitle");
     const editIdInput = document.getElementById("editProdId");
 
     if (mode === 'edit' && productId) {
-        title.innerText = "Chỉnh Sửa Thông Tin Sản Phẩm";
-        const prod = currentProducts.find(p => p.productId === productId);
+        title.innerText = "Chỉnh Sửa Sản Phẩm";
+        const prod = allProducts.find(p => p.productId === productId);
         if (prod) {
             editIdInput.value = prod.productId;
             document.getElementById("modalProdName").value = prod.productName;
@@ -151,18 +174,16 @@ async function handleSaveProduct(e) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(productPayload)
             });
-            alert("Cập nhật thông tin sản phẩm thành công!");
+            alert("Cập nhật sản phẩm thành công!");
         } else {
             await fetch(`${API_BASE_URL}/products`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(productPayload)
             });
-            alert("Thêm sản phẩm mới thành công!");
+            alert("Thêm sản phẩm thành công!");
         }
-    } catch (err) {
-        console.warn("Lưu cục bộ:", err);
-    }
+    } catch (err) {}
 
     closeProductModal();
     await loadProductsTable();
@@ -170,7 +191,7 @@ async function handleSaveProduct(e) {
 }
 
 async function deleteProductHandler(id) {
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+    if (confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
         try {
             await fetch(`${API_BASE_URL}/products/${id}`, { method: 'DELETE' });
         } catch (e) {}
@@ -180,18 +201,22 @@ async function deleteProductHandler(id) {
     }
 }
 
-// 3. Quản lý Đơn hàng
+// 3. Quản lý Đơn hàng & Xem chi tiết
 async function loadOrdersTable() {
-    const orders = await DataStore.getOrders();
+    allOrders = await DataStore.getOrders();
+    renderOrders(allOrders);
+}
+
+function renderOrders(items) {
     const table = document.getElementById("ordersTableBody");
     table.innerHTML = "";
 
-    if (!orders || orders.length === 0) {
-        table.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 font-medium">Chưa có đơn hàng nào</td></tr>`;
+    if (!items || items.length === 0) {
+        table.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400 font-medium">Không tìm thấy đơn hàng nào</td></tr>`;
         return;
     }
 
-    [...orders].reverse().forEach(o => {
+    [...items].reverse().forEach(o => {
         const currentStatus = o.orderStatus || o.status || 'Chờ xử lý';
         const tr = document.createElement("tr");
         tr.className = "border-b hover:bg-gray-50";
@@ -218,13 +243,53 @@ async function loadOrdersTable() {
                 </select>
             </td>
             <td class="py-3 px-4 text-center">
+                <button onclick="viewOrderDetailModal('${o.orderId}')" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold px-2.5 py-1 bg-indigo-50 rounded border border-indigo-200">
+                    <i class="fa-solid fa-eye"></i> Xem
+                </button>
+            </td>
+            <td class="py-3 px-4 text-center">
                 <button onclick="deleteOrderHandler('${o.orderId}')" class="text-red-500 hover:text-red-700 font-medium text-xs p-1">
-                    <i class="fa-solid fa-trash-can"></i> Xóa
+                    <i class="fa-solid fa-trash-can"></i>
                 </button>
             </td>
         `;
         table.appendChild(tr);
     });
+}
+
+function filterOrdersList() {
+    const searchVal = document.getElementById("searchOrderInput").value.toLowerCase().trim();
+    const statusVal = document.getElementById("filterOrderStatus").value;
+
+    const filtered = allOrders.filter(o => {
+        const matchText = (o.orderCode || '').toLowerCase().includes(searchVal) ||
+                          (o.customerName || '').toLowerCase().includes(searchVal) ||
+                          (o.customerPhone || '').includes(searchVal);
+        const currentStatus = o.orderStatus || o.status || 'Chờ xử lý';
+        const matchStatus = (statusVal === 'all') || (currentStatus === statusVal);
+        return matchText && matchStatus;
+    });
+
+    renderOrders(filtered);
+}
+
+function viewOrderDetailModal(orderId) {
+    const ord = allOrders.find(o => o.orderId == orderId || o.orderCode == orderId);
+    if (!ord) return;
+
+    document.getElementById("viewOrderCode").innerText = `Mã đơn hàng: ${ord.orderCode || ord.orderId}`;
+    document.getElementById("viewCustName").innerText = ord.customerName;
+    document.getElementById("viewCustPhone").innerText = ord.customerPhone;
+    document.getElementById("viewCustAddress").innerText = ord.customerAddress;
+    document.getElementById("viewPayment").innerText = ord.paymentMethod;
+    document.getElementById("viewOrderDate").innerText = new Date(ord.createdAt).toLocaleString('vi-VN');
+    document.getElementById("viewTotalAmount").innerText = `${Number(ord.totalAmount).toLocaleString('vi-VN')} đ`;
+
+    document.getElementById("orderDetailModal").classList.remove("hidden");
+}
+
+function closeOrderDetailModal() {
+    document.getElementById("orderDetailModal").classList.add("hidden");
 }
 
 async function changeOrderStatusHandler(orderId, newStatus) {
@@ -243,7 +308,6 @@ async function changeOrderStatusHandler(orderId, newStatus) {
         localStorage.setItem("shop_orders", JSON.stringify(orders));
     }
 
-    alert(`Đã cập nhật đơn hàng sang trạng thái: "${newStatus}"`);
     await loadOrdersTable();
     await loadOverviewStats();
 }
@@ -258,7 +322,7 @@ function deleteOrderHandler(orderId) {
     }
 }
 
-// 4. Quản lý Khách hàng
+// 4. Quản lý Tài khoản Người dùng
 async function loadUsersTable() {
     const users = await DataStore.getUsers();
     const table = document.getElementById("usersTableBody");
@@ -279,4 +343,33 @@ async function loadUsersTable() {
         `;
         table.appendChild(tr);
     });
+}
+
+function openUserModal() {
+    document.getElementById("newFullName").value = "";
+    document.getElementById("newEmail").value = "";
+    document.getElementById("newPassword").value = "";
+    document.getElementById("newRole").value = "user";
+    document.getElementById("userModal").classList.remove("hidden");
+}
+
+function closeUserModal() {
+    document.getElementById("userModal").classList.add("hidden");
+}
+
+async function handleCreateUser(e) {
+    e.preventDefault();
+    const fullName = document.getElementById("newFullName").value.trim();
+    const email = document.getElementById("newEmail").value.trim();
+    const password = document.getElementById("newPassword").value.trim();
+    const role = document.getElementById("newRole").value;
+
+    try {
+        await DataStore.register(fullName, email, password);
+    } catch (e) {}
+
+    closeUserModal();
+    await loadUsersTable();
+    await loadOverviewStats();
+    alert(`Đã tạo tài khoản "${fullName}" (${role}) thành công!`);
 }
