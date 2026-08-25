@@ -4,18 +4,13 @@ let allOrders = [];
 document.addEventListener("DOMContentLoaded", async () => {
     const user = DataStore.getCurrentUser();
     if (!user || user.role !== 'admin') {
-        alert("Bạn cần đăng nhập bằng tài khoản Quản trị viên (Admin)!");
+        alert("Bạn cần đăng nhập bằng tài khoản Quản trị viên (Admin) để truy cập!");
         window.location.href = "login.html";
         return;
     }
 
-    const nameElem = document.getElementById("adminDisplayName");
-    if (nameElem) nameElem.innerText = user.name || user.fullName;
-
     await loadOverviewStats();
-    await loadProductsTable();
     await loadOrdersTable();
-    await loadUsersTable();
 });
 
 // Chuyển Tab
@@ -37,33 +32,16 @@ function switchAdminTab(tab) {
 // 1. Tổng quan
 async function loadOverviewStats() {
     const stats = await DataStore.getStats();
-    const orders = await DataStore.getOrders();
 
-    document.getElementById("admRevenue").innerText = `${Number(stats.revenue || 0).toLocaleString('vi-VN')} đ`;
-    document.getElementById("admOrdersCount").innerText = stats.ordersCount || 0;
-    document.getElementById("admProductsCount").innerText = stats.productsCount || 0;
-    document.getElementById("admUsersCount").innerText = stats.usersCount || 0;
+    const revElem = document.getElementById("admRevenue");
+    const ordElem = document.getElementById("admOrdersCount");
+    const prodElem = document.getElementById("admProductsCount");
+    const userElem = document.getElementById("admUsersCount");
 
-    const recentTable = document.getElementById("recentOrdersTable");
-    recentTable.innerHTML = "";
-
-    if (!orders || orders.length === 0) {
-        recentTable.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-400">Chưa có đơn hàng nào phát sinh</td></tr>`;
-        return;
-    }
-
-    [...orders].reverse().slice(0, 5).forEach(o => {
-        const tr = document.createElement("tr");
-        tr.className = "border-b hover:bg-gray-50";
-        tr.innerHTML = `
-            <td class="py-3 px-4 font-bold text-indigo-600">${o.orderCode || o.orderId}</td>
-            <td class="py-3 px-4 font-semibold">${o.customerName}</td>
-            <td class="py-3 px-4 text-xs"><span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded border">${o.paymentMethod}</span></td>
-            <td class="py-3 px-4 font-bold text-indigo-600">${Number(o.totalAmount).toLocaleString('vi-VN')} đ</td>
-            <td class="py-3 px-4 text-xs">${new Date(o.createdAt).toLocaleString('vi-VN')}</td>
-        `;
-        recentTable.appendChild(tr);
-    });
+    if (revElem) revElem.innerText = `${Number(stats.revenue || 0).toLocaleString('vi-VN')} đ`;
+    if (ordElem) ordElem.innerText = stats.ordersCount || 0;
+    if (prodElem) prodElem.innerText = stats.productsCount || 0;
+    if (userElem) userElem.innerText = stats.usersCount || 0;
 }
 
 // 2. Quản lý Sản phẩm & Bộ lọc
@@ -203,8 +181,32 @@ async function deleteProductHandler(id) {
 
 // 3. Quản lý Đơn hàng & Xem chi tiết
 async function loadOrdersTable() {
-    allOrders = await DataStore.getOrders();
-    renderOrders(allOrders);
+    const orders = await DataStore.getOrders();
+    const table = document.getElementById("admOrdersTable");
+    if (!table) return;
+
+    table.innerHTML = "";
+
+    if (!orders || orders.length === 0) {
+        table.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-400 font-medium">Chưa có đơn hàng nào trong hệ thống</td></tr>`;
+        return;
+    }
+
+    [...orders].reverse().forEach(o => {
+        const tr = document.createElement("tr");
+        tr.className = "border-b hover:bg-gray-50";
+        tr.innerHTML = `
+            <td class="py-3 px-4 font-bold text-indigo-600">${o.orderCode || o.orderId}</td>
+            <td class="py-3 px-4">
+                <p class="font-semibold text-gray-800">${o.customerName}</p>
+                <p class="text-xs text-gray-500">${o.customerPhone}</p>
+            </td>
+            <td class="py-3 px-4 text-xs"><span class="bg-gray-100 px-2 py-0.5 rounded border">${o.paymentMethod}</span></td>
+            <td class="py-3 px-4 font-bold text-indigo-600">${Number(o.totalAmount).toLocaleString('vi-VN')} đ</td>
+            <td class="py-3 px-4 text-xs text-gray-500">${new Date(o.createdAt).toLocaleString('vi-VN')}</td>
+        `;
+        table.appendChild(tr);
+    });
 }
 
 function renderOrders(items) {
