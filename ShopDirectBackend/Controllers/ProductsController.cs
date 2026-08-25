@@ -55,8 +55,8 @@ namespace ShopDirectBackend.Controllers
         [HttpGet("category/{categoryCode}")]
         public async Task<IActionResult> GetByCategory(string categoryCode)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryCode == categoryCode);
-            if (category == null) return Ok(new List<Product>());
+            var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryCode.ToLower() == categoryCode.ToLower());
+            if (category == null) return Ok(new List<object>());
 
             var products = await _context.Products.Where(p => p.CategoryId == category.CategoryId).ToListAsync();
             return Ok(products.Select(p => new

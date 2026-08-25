@@ -10,7 +10,7 @@ namespace ShopDirectBackend.Models
         public string CustomerAddress { get; set; } = string.Empty;
         public decimal TotalAmount { get; set; }
         public string PaymentMethod { get; set; } = string.Empty;
-        public string OrderStatus { get; set; } = "Đang xử lý";
+        public string OrderStatus { get; set; } = "Chờ xử lý";
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public List<OrderDetail> OrderDetails { get; set; } = new();
     }

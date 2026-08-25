@@ -30,7 +30,7 @@ namespace ShopDirectBackend.Controllers
                     o.CustomerAddress,
                     o.TotalAmount,
                     o.PaymentMethod,
-                    OrderStatus = o.Status ?? "Chờ xử lý",
+                    OrderStatus = o.OrderStatus,
                     o.CreatedAt
                 })
                 .ToListAsync();
@@ -39,30 +39,48 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] Order orderPayload)
+        public async Task<IActionResult> CreateOrder([FromBody] OrderRequest request)
         {
-            if (string.IsNullOrWhiteSpace(orderPayload.OrderCode))
+            var order = new Order
             {
-                orderPayload.OrderCode = "HD" + DateTime.Now.ToString("yyMMddHHmmss");
-            }
-            orderPayload.CreatedAt = DateTime.Now;
-            orderPayload.Status = "Chờ xử lý";
+                OrderCode = "HD" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()[^6..],
+                CustomerName = request.CustomerName,
+                CustomerPhone = request.CustomerPhone,
+                CustomerAddress = request.CustomerAddress,
+                TotalAmount = request.TotalAmount,
+                PaymentMethod = request.PaymentMethod,
+                OrderStatus = "Chờ xử lý",
+                CreatedAt = DateTime.Now
+            };
 
-            _context.Orders.Add(orderPayload);
+            if (request.Items != null)
+            {
+                foreach (var item in request.Items)
+                {
+                    order.OrderDetails.Add(new OrderDetail
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice
+                    });
+                }
+            }
+
+            _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            return Ok(orderPayload);
+            return Ok(order);
         }
 
         [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] string status)
+        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] StatusUpdateRequest request)
         {
             var order = await _context.Orders.FindAsync(id);
             if (order == null) return NotFound(new { message = "Không tìm thấy đơn hàng!" });
 
-            order.Status = status;
+            order.OrderStatus = request.Status;
             await _context.SaveChangesAsync();
-            return Ok(new { message = "Cập nhật trạng thái thành công!", status = order.Status });
+            return Ok(new { message = "Cập nhật trạng thái thành công!", orderStatus = order.OrderStatus });
         }
 
         [HttpDelete("{id}")]
@@ -92,5 +110,27 @@ namespace ShopDirectBackend.Controllers
                 usersCount
             });
         }
+    }
+
+    public class OrderRequest
+    {
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
+        public string CustomerAddress { get; set; } = string.Empty;
+        public decimal TotalAmount { get; set; }
+        public string PaymentMethod { get; set; } = string.Empty;
+        public List<OrderItemRequest>? Items { get; set; }
+    }
+
+    public class OrderItemRequest
+    {
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+    }
+
+    public class StatusUpdateRequest
+    {
+        public string Status { get; set; } = string.Empty;
     }
 }
