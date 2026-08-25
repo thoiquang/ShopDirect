@@ -1,87 +1,87 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const user = DataStore.getCurrentUser();
     const cart = DataStore.getCart();
+
     if (!cart || cart.length === 0) {
-        alert("Giỏ hàng đang trống! Vui lòng chọn sản phẩm trước khi thanh toán.");
-        window.location.href = "home.html";
+        alert("Giỏ hàng của bạn đang trống!");
+        window.location.href = "cart.html";
         return;
     }
 
-    const user = DataStore.getCurrentUser();
-    if (user) {
-        document.getElementById("custName").value = user.name || user.fullName || "";
+    if (!user) {
+        alert("Vui lòng đăng nhập để thanh toán!");
+        window.location.href = "login.html";
+        return;
     }
 
+    // Tự động điền thông tin nếu có sẵn từ tài khoản
+    if (user.fullName) document.getElementById("fullName").value = user.fullName;
+    if (user.email) document.getElementById("email").value = user.email;
+    if (user.phone) document.getElementById("phone").value = user.phone;
+    if (user.address) document.getElementById("address").value = user.address;
+
     renderCheckoutSummary();
+
+    // Lắng nghe sự kiện submit đặt hàng
+    const checkoutForm = document.getElementById("checkoutForm");
+    if (checkoutForm) {
+        checkoutForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            handlePlaceOrder();
+        });
+    }
 });
 
 function renderCheckoutSummary() {
     const cart = DataStore.getCart();
-    const container = document.getElementById("checkoutSummary");
-    let total = 0;
+    const container = document.getElementById("checkoutItemsList");
+    const subTotalElem = document.getElementById("subTotal");
+    const finalTotalElem = document.getElementById("finalTotal");
 
     container.innerHTML = "";
+    let total = 0;
+
     cart.forEach(item => {
         const itemTotal = item.price * item.quantity;
         total += itemTotal;
-        const row = document.createElement("div");
-        row.className = "flex justify-between text-gray-700 text-xs sm:text-sm py-1";
-        row.innerHTML = `<span>${item.productName} <b class="text-indigo-600">x${item.quantity}</b></span><span class="font-bold">${Number(itemTotal).toLocaleString('vi-VN')} đ</span>`;
-        container.appendChild(row);
+
+        const div = document.createElement("div");
+        div.className = "flex items-center justify-between gap-3 text-sm";
+        div.innerHTML = `
+            <div class="flex items-center gap-2 truncate">
+                <img src="${item.imageUrl}" class="w-10 h-10 object-cover rounded border">
+                <span class="truncate font-medium">${item.productName} x${item.quantity}</span>
+            </div>
+            <span class="font-bold whitespace-nowrap">${Number(itemTotal).toLocaleString('vi-VN')} đ</span>
+        `;
+        container.appendChild(div);
     });
 
-    const totalRow = document.createElement("div");
-    totalRow.className = "flex justify-between font-extrabold text-base text-indigo-600 pt-3 border-t mt-2";
-    totalRow.innerHTML = `<span>Tổng tiền thanh toán:</span><span>${Number(total).toLocaleString('vi-VN')} đ</span>`;
-    container.appendChild(totalRow);
-
-    const memo = "SD" + Math.floor(100000 + Math.random() * 900000);
-    const memoElem = document.getElementById("qrMemo");
-    const imgElem = document.getElementById("qrImg");
-    if (memoElem) memoElem.innerText = memo;
-    if (imgElem) imgElem.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://shopdirect.vn/pay?amount=${total}%26memo=${memo}`;
+    subTotalElem.innerText = `${Number(total).toLocaleString('vi-VN')} đ`;
+    finalTotalElem.innerText = `${Number(total).toLocaleString('vi-VN')} đ`;
 }
 
-function toggleQR(show) {
-    const qrArea = document.getElementById("qrArea");
-    if (show) qrArea.classList.remove("hidden");
-    else qrArea.classList.add("hidden");
-}
-
-async function handleCheckout(e) {
-    e.preventDefault();
+function handlePlaceOrder() {
     const cart = DataStore.getCart();
-    if (!cart || cart.length === 0) {
-        alert("Giỏ hàng trống!");
-        window.location.href = "home.html";
-        return;
-    }
+    const user = DataStore.getCurrentUser();
 
-    const name = document.getElementById("custName").value.trim();
-    const phone = document.getElementById("custPhone").value.trim();
-    const address = document.getElementById("custAddress").value.trim();
-    const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-    const orderPayload = {
-        customerName: name,
-        customerPhone: phone,
-        customerAddress: address,
-        totalAmount: total,
-        paymentMethod: payMethod === 'COD' ? 'Thanh toán COD' : 'Chuyển khoản QR',
-        items: cart.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: item.price
-        }))
+    const orderData = {
+        userId: user ? user.userId : 1,
+        fullName: document.getElementById("fullName").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+        address: document.getElementById("address").value,
+        paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
+        items: cart
     };
 
-    try {
-        const orderResult = await DataStore.createOrder(orderPayload);
-        DataStore.saveCart([]);
-        updateCartBadge();
-        alert(`🎉 Đặt hàng thành công!\nMã đơn hàng của bạn: ${orderResult.orderCode || orderResult.orderId}`);
-        window.location.href = "home.html";
-    } catch (error) {
-        alert("Lỗi khi tạo đơn hàng: " + error.message);
-    }
+    // Giả lập lưu đơn hàng thành công và xóa giỏ hàng
+    console.log("Đã gửi đơn hàng:", orderData);
+    alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại ShopDirect.");
+    
+    // Xóa giỏ hàng
+    localStorage.removeItem("shop_cart");
+
+    // Điều hướng về trang chủ
+    window.location.href = "home.html";
 }
