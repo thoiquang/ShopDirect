@@ -13,10 +13,10 @@ function renderCart() {
             <div class="text-center py-12 text-gray-400">
                 <i class="fa-solid fa-basket-shopping text-5xl mb-3"></i>
                 <p class="font-medium">Giỏ hàng của bạn đang trống</p>
-                <a href="home.html" class="inline-block mt-4 text-indigo-600 font-bold hover:underline">Khám phá sản phẩm ngay</a>
+                <a href="home.html" class="inline-block mt-3 text-indigo-600 font-bold hover:underline">Quay lại mua hàng</a>
             </div>
         `;
-        totalSumElem.innerText = "0 đ";
+        if (totalSumElem) totalSumElem.innerText = "0 đ";
         if (checkoutBtn) checkoutBtn.classList.add("pointer-events-none", "opacity-50");
         return;
     }
@@ -54,7 +54,7 @@ function renderCart() {
         container.appendChild(row);
     });
 
-    totalSumElem.innerText = `${Number(total).toLocaleString('vi-VN')} đ`;
+    if (totalSumElem) totalSumElem.innerText = `${Number(total).toLocaleString('vi-VN')} đ`;
 }
 
 function changeQty(productId, delta) {
@@ -83,7 +83,7 @@ function removeItem(productId) {
 function goToCheckout() {
     const cart = DataStore.getCart();
     if (!cart || cart.length === 0) {
-        alert("Giỏ hàng của bạn đang trống!");
+        alert("Giỏ hàng đang trống! Vui lòng chọn sản phẩm.");
         return;
     }
     window.location.href = "checkout.html";
