@@ -36,9 +36,7 @@ const DataStore = {
             clearTimeout(timeoutId);
             if (res.ok) {
                 const data = await res.json();
-                if (Array.isArray(data) && data.length > 0) {
-                    return data.map(normalizeProduct);
-                }
+                if (Array.isArray(data) && data.length > 0) return data.map(normalizeProduct);
             }
         } catch (e) {}
         return fallbackProducts.map(normalizeProduct);
@@ -68,9 +66,7 @@ const DataStore = {
             clearTimeout(timeoutId);
             if (res.ok) {
                 const data = await res.json();
-                if (Array.isArray(data) && data.length > 0) {
-                    return data.map(normalizeProduct);
-                }
+                if (Array.isArray(data) && data.length > 0) return data.map(normalizeProduct);
             }
         } catch (e) {}
         return fallbackProducts.filter(p => p.categoryCode === categoryCode).map(normalizeProduct);
@@ -83,9 +79,7 @@ const DataStore = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
-            if (res.ok) {
-                return await res.json();
-            }
+            if (res.ok) return await res.json();
             const err = await res.json();
             throw new Error(err.message || 'Đăng nhập thất bại');
         } catch (e) {
@@ -129,6 +123,7 @@ const DataStore = {
             customerAddress: orderPayload.customerAddress,
             totalAmount: orderPayload.totalAmount,
             paymentMethod: orderPayload.paymentMethod,
+            status: "Chờ xử lý",
             createdAt: new Date().toISOString()
         };
         localOrders.push(newOrder);

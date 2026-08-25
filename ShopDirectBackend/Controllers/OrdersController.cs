@@ -51,18 +51,7 @@ namespace ShopDirectBackend.Controllers
             _context.Orders.Add(orderPayload);
             await _context.SaveChangesAsync();
 
-            return Ok(new
-            {
-                orderPayload.OrderId,
-                orderPayload.OrderCode,
-                orderPayload.CustomerName,
-                orderPayload.CustomerPhone,
-                orderPayload.CustomerAddress,
-                orderPayload.TotalAmount,
-                orderPayload.PaymentMethod,
-                orderPayload.Status,
-                orderPayload.CreatedAt
-            });
+            return Ok(orderPayload);
         }
 
         [HttpPut("{id}/status")]
@@ -74,6 +63,17 @@ namespace ShopDirectBackend.Controllers
             order.Status = status;
             await _context.SaveChangesAsync();
             return Ok(new { message = "Cập nhật trạng thái thành công!", status = order.Status });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrder(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null) return NotFound(new { message = "Không tìm thấy đơn hàng!" });
+
+            _context.Orders.Remove(order);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Xóa đơn hàng thành công" });
         }
 
         [HttpGet("stats")]

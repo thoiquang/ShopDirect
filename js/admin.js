@@ -312,13 +312,17 @@ async function changeOrderStatusHandler(orderId, newStatus) {
     await loadOverviewStats();
 }
 
-function deleteOrderHandler(orderId) {
+async function deleteOrderHandler(orderId) {
     if (confirm(`Bạn có chắc muốn xóa đơn hàng này?`)) {
+        try {
+            await fetch(`${API_BASE_URL}/orders/${orderId}`, { method: 'DELETE' });
+        } catch (e) {}
+
         let orders = JSON.parse(localStorage.getItem("shop_orders")) || [];
         orders = orders.filter(o => o.orderId != orderId && o.orderCode != orderId);
         localStorage.setItem("shop_orders", JSON.stringify(orders));
-        loadOrdersTable();
-        loadOverviewStats();
+        await loadOrdersTable();
+        await loadOverviewStats();
     }
 }
 
