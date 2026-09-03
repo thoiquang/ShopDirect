@@ -10,11 +10,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).join("");
 });
 
-function requestReturn(orderId) {
+async function requestReturn(orderId) {
     const reason = prompt("Lý do trả hàng / hàng lỗi:");
     if (!reason?.trim()) return;
-    const returns = JSON.parse(localStorage.getItem("shop_returns") || "[]");
-    returns.push({ orderId, reason: reason.trim(), status: "Chờ duyệt", createdAt: new Date().toISOString() });
-    localStorage.setItem("shop_returns", JSON.stringify(returns));
-    window.location.reload();
+    try {
+        await DataStore.createReturn(orderId, reason.trim());
+        alert("Đã gửi yêu cầu trả hàng, cửa hàng sẽ phản hồi sớm.");
+        window.location.reload();
+    } catch (error) {
+        alert(error.message || "Không thể gửi yêu cầu trả hàng.");
+    }
 }

@@ -54,11 +54,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         event.preventDefault();
         const user = DataStore.getCurrentUser();
         if (!user) { alert("Vui lòng đăng nhập để đánh giá sản phẩm."); return; }
-        const reviews = JSON.parse(localStorage.getItem("shop_reviews") || "[]");
-        reviews.push({ productId: String(productId), name: user.name || user.fullName, rating: Number(document.getElementById("reviewRating").value), comment: document.getElementById("reviewComment").value.trim(), createdAt: new Date().toISOString() });
-        localStorage.setItem("shop_reviews", JSON.stringify(reviews));
-        document.getElementById("reviewComment").value = "";
-        renderReviews(productId);
+        DataStore.createReview(productId, { rating: Number(document.getElementById("reviewRating").value), comment: document.getElementById("reviewComment").value.trim() }).then(() => {
+            document.getElementById("reviewComment").value = "";
+            renderReviews(productId);
+        });
     });
 
     document.getElementById("detailAddToCartBtn").onclick = () => {
@@ -72,10 +71,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 });
 
-function renderReviews(productId) {
-    const reviews = JSON.parse(localStorage.getItem("shop_reviews") || "[]").filter(review => review.productId === String(productId));
+async function renderReviews(productId) {
+    const reviews = await DataStore.getReviews(productId);
     const list = document.getElementById("reviewList");
     const average = reviews.length ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1) : "Chưa có đánh giá";
     document.getElementById("reviewAverage").innerText = reviews.length ? `${average}/5 (${reviews.length} đánh giá)` : average;
-    list.innerHTML = reviews.length ? reviews.map(review => `<div class="border rounded-lg p-3"><div class="flex justify-between"><strong>${review.name}</strong><span class="text-orange-500">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span></div><p class="text-sm text-gray-600 mt-1">${review.comment}</p></div>`).join("") : '<p class="text-sm text-gray-400">Hãy là người đầu tiên đánh giá sản phẩm này.</p>';
+    list.innerHTML = reviews.length ? reviews.map(review => `<div class="border rounded-lg p-3"><div class="flex justify-between"><strong>${review.name || 'Khách hàng'}</strong><span class="text-orange-500">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span></div><p class="text-sm text-gray-600 mt-1">${review.comment}</p></div>`).join("") : '<p class="text-sm text-gray-400">Hãy là người đầu tiên đánh giá sản phẩm này.</p>';
 }

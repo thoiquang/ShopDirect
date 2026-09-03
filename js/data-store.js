@@ -184,6 +184,37 @@ const DataStore = {
         return data;
     },
 
+    getReviews: async function(productId) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews`);
+            if (res.ok) return await res.json();
+        } catch (e) {}
+        return (JSON.parse(localStorage.getItem("shop_reviews")) || []).filter(review => String(review.productId) === String(productId));
+    },
+
+    createReview: async function(productId, review) {
+        const localReview = { ...review, productId: String(productId), createdAt: new Date().toISOString() };
+        try {
+            const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() }, body: JSON.stringify(review)
+            });
+            if (res.ok) return await res.json();
+        } catch (e) {}
+        const reviews = JSON.parse(localStorage.getItem("shop_reviews")) || [];
+        reviews.push(localReview);
+        localStorage.setItem("shop_reviews", JSON.stringify(reviews));
+        return localReview;
+    },
+
+    createReturn: async function(orderId, reason) {
+        const response = await fetch(`${API_BASE_URL}/returns`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() }, body: JSON.stringify({ orderId: Number(orderId), reason })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || "Không thể gửi yêu cầu trả hàng.");
+        return data;
+    },
+
     getStats: async function() {
         try {
             const res = await fetch(`${API_BASE_URL}/orders/stats`, { headers: this.getAuthHeaders() });
