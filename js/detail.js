@@ -38,7 +38,28 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
             </div>
         </div>
+        <section class="mt-8 border-t pt-6">
+            <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">Đánh giá sản phẩm</h2><span id="reviewAverage" class="text-sm text-orange-500 font-bold"></span></div>
+            <div id="reviewList" class="space-y-3 mb-5"></div>
+            <form id="reviewForm" class="bg-gray-50 border rounded-xl p-4 space-y-3">
+                <div><label class="block text-sm font-semibold mb-1">Số sao</label><select id="reviewRating" class="border rounded-lg px-3 py-2"><option value="5">5 sao</option><option value="4">4 sao</option><option value="3">3 sao</option><option value="2">2 sao</option><option value="1">1 sao</option></select></div>
+                <textarea id="reviewComment" required rows="3" placeholder="Chia sẻ trải nghiệm của bạn..." class="w-full border rounded-lg px-3 py-2"></textarea>
+                <button class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-lg">Gửi đánh giá</button>
+            </form>
+        </section>
     `;
+
+    renderReviews(productId);
+    document.getElementById("reviewForm").addEventListener("submit", event => {
+        event.preventDefault();
+        const user = DataStore.getCurrentUser();
+        if (!user) { alert("Vui lòng đăng nhập để đánh giá sản phẩm."); return; }
+        const reviews = JSON.parse(localStorage.getItem("shop_reviews") || "[]");
+        reviews.push({ productId: String(productId), name: user.name || user.fullName, rating: Number(document.getElementById("reviewRating").value), comment: document.getElementById("reviewComment").value.trim(), createdAt: new Date().toISOString() });
+        localStorage.setItem("shop_reviews", JSON.stringify(reviews));
+        document.getElementById("reviewComment").value = "";
+        renderReviews(productId);
+    });
 
     document.getElementById("detailAddToCartBtn").onclick = () => {
         DataStore.addToCart(product);
@@ -50,3 +71,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "checkout.html";
     };
 });
+
+function renderReviews(productId) {
+    const reviews = JSON.parse(localStorage.getItem("shop_reviews") || "[]").filter(review => review.productId === String(productId));
+    const list = document.getElementById("reviewList");
+    const average = reviews.length ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1) : "Chưa có đánh giá";
+    document.getElementById("reviewAverage").innerText = reviews.length ? `${average}/5 (${reviews.length} đánh giá)` : average;
+    list.innerHTML = reviews.length ? reviews.map(review => `<div class="border rounded-lg p-3"><div class="flex justify-between"><strong>${review.name}</strong><span class="text-orange-500">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span></div><p class="text-sm text-gray-600 mt-1">${review.comment}</p></div>`).join("") : '<p class="text-sm text-gray-400">Hãy là người đầu tiên đánh giá sản phẩm này.</p>';
+}

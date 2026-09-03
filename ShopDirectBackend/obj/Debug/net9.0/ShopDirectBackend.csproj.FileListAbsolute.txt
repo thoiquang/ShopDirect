@@ -163,3 +163,4 @@ D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\refint\ShopDirectBackend.
 D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.pdb
 D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ShopDirectBackend.genruntimeconfig.cache
 D:\VNPT\duanthuctap\ShopDirectBackend\obj\Debug\net9.0\ref\ShopDirectBackend.dll
+D:\VNPT\duanthuctap\ShopDirectBackend\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

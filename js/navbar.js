@@ -37,6 +37,8 @@ function renderNavbar() {
                                 <p class="font-bold text-xs text-indigo-600 truncate">${currentUser.name || currentUser.fullName}</p>
                                 <p class="text-[11px] text-gray-500 uppercase font-semibold mt-0.5">${currentUser.role === 'admin' ? 'Quản trị viên (Admin)' : 'Khách hàng'}</p>
                             </div>
+                            <a href="profile.html" class="block px-4 py-2.5 text-xs hover:bg-indigo-50 border-b transition"><i class="fa-solid fa-user-gear mr-2 text-indigo-600"></i>Thông tin cá nhân</a>
+                            <a href="orders.html" class="block px-4 py-2.5 text-xs hover:bg-indigo-50 border-b transition"><i class="fa-solid fa-box mr-2 text-indigo-600"></i>Đơn mua của tôi</a>
                             ${currentUser.role === 'admin' ? `
                                 <a href="admin.html" class="block px-4 py-2.5 text-xs text-purple-700 hover:bg-purple-50 font-bold border-b transition">
                                     <i class="fa-solid fa-gauge-high mr-2 text-purple-600"></i> Trang Quản Trị

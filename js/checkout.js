@@ -81,10 +81,10 @@ async function handlePlaceOrder() {
     };
 
     try {
-        await DataStore.createOrder(orderData);
+        const order = await DataStore.createOrder(orderData);
         alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại ShopDirect.");
         localStorage.removeItem("shop_cart");
-        window.location.href = "home.html";
+        window.location.href = `invoice.html?id=${order.orderId}`;
     } catch (error) {
         alert(error.message || "Không thể đặt hàng. Vui lòng thử lại.");
     }

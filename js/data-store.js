@@ -127,6 +127,7 @@ const DataStore = {
         const localOrders = JSON.parse(localStorage.getItem("shop_orders")) || [];
         const newOrder = {
             orderId: Date.now(),
+            userId: orderPayload.userId,
             orderCode: "HD" + Date.now().toString().slice(-6),
             customerName: orderPayload.customerName,
             customerPhone: orderPayload.customerPhone,
@@ -147,6 +148,40 @@ const DataStore = {
             if (res.ok) return await res.json();
         } catch (e) {}
         return JSON.parse(localStorage.getItem("shop_orders")) || [];
+    },
+
+    getMyOrders: async function() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/orders/mine`, { headers: this.getAuthHeaders() });
+            if (res.ok) return await res.json();
+        } catch (e) {}
+        const user = this.getCurrentUser();
+        return (JSON.parse(localStorage.getItem("shop_orders")) || []).filter(order => !order.userId || order.userId === user?.userId);
+    },
+
+    getOrder: async function(orderId) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/orders/${orderId}`, { headers: this.getAuthHeaders() });
+            if (res.ok) return await res.json();
+        } catch (e) {}
+        return (JSON.parse(localStorage.getItem("shop_orders")) || []).find(order => String(order.orderId) === String(orderId)) || null;
+    },
+
+    getProfile: async function() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/auth/me`, { headers: this.getAuthHeaders() });
+            if (res.ok) return await res.json();
+        } catch (e) {}
+        return this.getCurrentUser();
+    },
+
+    updateProfile: async function(profile) {
+        const res = await fetch(`${API_BASE_URL}/auth/me`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() }, body: JSON.stringify(profile)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.message || "Không thể cập nhật thông tin.");
+        return data;
     },
 
     getStats: async function() {

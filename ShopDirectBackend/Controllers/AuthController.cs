@@ -51,9 +51,49 @@ namespace ShopDirectBackend.Controllers
                 userId = user.UserId,
                 fullName = user.FullName,
                 email = user.Email,
+                phone = user.Phone,
+                address = user.Address,
                 role,
                 token = new JwtSecurityTokenHandler().WriteToken(token)
             });
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = GetCurrentUserId();
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            return Ok(new { userId = user.UserId, fullName = user.FullName, email = user.Email, phone = user.Phone, address = user.Address, role = user.RoleId == 1 ? "admin" : "user" });
+        }
+
+        [HttpPut("me")]
+        [Authorize]
+        public async Task<IActionResult> UpdateCurrentUser([FromBody] ProfileUpdateRequest request)
+        {
+            var userId = GetCurrentUserId();
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+            if (string.IsNullOrWhiteSpace(request.FullName) || string.IsNullOrWhiteSpace(request.Email))
+                return BadRequest(new { message = "Họ tên và email không được để trống." });
+
+            var emailUsed = await _context.Users.AnyAsync(item => item.Email == request.Email && item.UserId != userId);
+            if (emailUsed) return BadRequest(new { message = "Email đã được sử dụng." });
+
+            user.FullName = request.FullName.Trim();
+            user.Email = request.Email.Trim();
+            user.Phone = request.Phone?.Trim();
+            user.Address = request.Address?.Trim();
+            await _context.SaveChangesAsync();
+            return Ok(new { userId = user.UserId, fullName = user.FullName, email = user.Email, phone = user.Phone, address = user.Address, role = user.RoleId == 1 ? "admin" : "user" });
+        }
+
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(claim ?? throw new UnauthorizedAccessException("User identity is missing."));
         }
 
         [HttpPost("register")]
@@ -108,5 +148,13 @@ namespace ShopDirectBackend.Controllers
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+    public class ProfileUpdateRequest
+    {
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string? Address { get; set; }
     }
 }

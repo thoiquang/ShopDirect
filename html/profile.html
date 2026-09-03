@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài khoản - ShopDirect</title><script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen"><div id="navbarContainer"></div>
+<main class="flex-1 container mx-auto px-4 py-8 "><div class="max-w-2xl mx-auto bg-white rounded-2xl border shadow-sm p-6">
+<h1 class="text-2xl font-bold mb-6"><i class="fa-solid fa-user-gear text-indigo-600 mr-2"></i>Thông tin cá nhân</h1>
+<form id="profileForm" class="space-y-4"><div><label class="block text-sm font-semibold mb-1">Họ và tên</label><input id="profileName" required class="w-full border rounded-lg px-3 py-2"></div>
+<div><label class="block text-sm font-semibold mb-1">Email</label><input id="profileEmail" type="email" required class="w-full border rounded-lg px-3 py-2"></div>
+<div><label class="block text-sm font-semibold mb-1">Số điện thoại</label><input id="profilePhone" type="tel" class="w-full border rounded-lg px-3 py-2"></div>
+<div><label class="block text-sm font-semibold mb-1">Địa chỉ nhận hàng</label><textarea id="profileAddress" rows="3" class="w-full border rounded-lg px-3 py-2"></textarea></div>
+<p id="profileMessage" class="text-sm"></p><button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-lg"><i class="fa-solid fa-floppy-disk mr-2"></i>Lưu thay đổi</button></form>
+</div></main><div id="footerContainer"></div><script src="../js/data-store.js"></script><script src="../js/navbar.js"></script><script src="../js/profile.js"></script></body></html>

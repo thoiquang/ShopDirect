@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using ShopDirectBackend.Data;
 using ShopDirectBackend.Models;
 
@@ -41,11 +43,13 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] OrderRequest request)
         {
+            var userId = GetCurrentUserId();
             var order = new Order
             {
-                UserId = request.UserId,
+                UserId = userId,
                 OrderCode = "HD" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()[^6..],
                 CustomerName = request.CustomerName,
                 CustomerPhone = request.CustomerPhone,
@@ -73,6 +77,44 @@ namespace ShopDirectBackend.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(order);
+        }
+
+        [HttpGet("mine")]
+        [Authorize]
+        public async Task<IActionResult> GetMyOrders()
+        {
+            var userId = GetCurrentUserId();
+            var orders = await _context.Orders.Where(order => order.UserId == userId).OrderByDescending(order => order.CreatedAt).Select(order => new
+            {
+                order.OrderId, order.OrderCode, order.CustomerName, order.CustomerPhone, order.CustomerAddress,
+                order.TotalAmount, order.PaymentMethod, order.OrderStatus, order.CreatedAt
+            }).ToListAsync();
+            return Ok(orders);
+        }
+
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetOrderDetail(int id)
+        {
+            var userId = GetCurrentUserId();
+            var isAdmin = User.IsInRole("admin");
+            var order = await _context.Orders.Include(item => item.OrderDetails).FirstOrDefaultAsync(item => item.OrderId == id && (isAdmin || item.UserId == userId));
+            if (order == null) return NotFound(new { message = "Không tìm thấy đơn hàng." });
+
+            var productIds = order.OrderDetails.Select(item => item.ProductId).ToList();
+            var products = await _context.Products.Where(product => productIds.Contains(product.ProductId)).ToDictionaryAsync(product => product.ProductId);
+            return Ok(new
+            {
+                order.OrderId, order.OrderCode, order.CustomerName, order.CustomerPhone, order.CustomerAddress,
+                order.TotalAmount, order.PaymentMethod, order.OrderStatus, order.CreatedAt,
+                items = order.OrderDetails.Select(item => new { item.ProductId, item.Quantity, item.UnitPrice, productName = products.ContainsKey(item.ProductId) ? products[item.ProductId].ProductName : "Sản phẩm" })
+            });
+        }
+
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(claim ?? throw new UnauthorizedAccessException("User identity is missing."));
         }
 
         [HttpPut("{id}/status")]
