@@ -1,7 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ShopDirectBackend.Data;
 using ShopDirectBackend.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace ShopDirectBackend.Controllers
 {
@@ -10,10 +15,12 @@ namespace ShopDirectBackend.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(AppDbContext context)
+        public AuthController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
@@ -27,12 +34,25 @@ namespace ShopDirectBackend.Controllers
                 return BadRequest(new { message = "Email hoặc mật khẩu không chính xác." });
             }
 
+            var role = user.RoleId == 1 ? "admin" : "user";
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, role)
+            };
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(claims: claims, expires: DateTime.UtcNow.AddHours(8), signingCredentials: credentials);
+
             return Ok(new
             {
                 userId = user.UserId,
                 fullName = user.FullName,
                 email = user.Email,
-                role = user.RoleId == 1 ? "admin" : "user"
+                role,
+                token = new JwtSecurityTokenHandler().WriteToken(token)
             });
         }
 
@@ -60,6 +80,7 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpGet("users")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _context.Users

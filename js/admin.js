@@ -151,14 +151,14 @@ async function handleSaveProduct(e) {
         if (editId) {
             await fetch(`${API_BASE_URL}/products/${editId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...DataStore.getAuthHeaders() },
                 body: JSON.stringify(productPayload)
             });
             alert("Cập nhật sản phẩm thành công!");
         } else {
             await fetch(`${API_BASE_URL}/products`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...DataStore.getAuthHeaders() },
                 body: JSON.stringify(productPayload)
             });
             alert("Thêm sản phẩm thành công!");
@@ -173,7 +173,7 @@ async function handleSaveProduct(e) {
 async function deleteProductHandler(id) {
     if (confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
         try {
-            await fetch(`${API_BASE_URL}/products/${id}`, { method: 'DELETE' });
+            await fetch(`${API_BASE_URL}/products/${id}`, { method: 'DELETE', headers: DataStore.getAuthHeaders() });
         } catch (e) {}
         await loadProductsTable();
         await loadOverviewStats();
@@ -301,7 +301,7 @@ async function changeOrderStatusHandler(orderId, newStatus) {
     try {
         const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...DataStore.getAuthHeaders() },
             body: JSON.stringify({ status: newStatus })
         });
         if (!response.ok) throw new Error("Không thể cập nhật trạng thái đơn hàng.");
@@ -325,7 +325,7 @@ async function changeOrderStatusHandler(orderId, newStatus) {
 async function deleteOrderHandler(orderId) {
     if (confirm(`Bạn có chắc muốn xóa đơn hàng này?`)) {
         try {
-            await fetch(`${API_BASE_URL}/orders/${orderId}`, { method: 'DELETE' });
+            await fetch(`${API_BASE_URL}/orders/${orderId}`, { method: 'DELETE', headers: DataStore.getAuthHeaders() });
         } catch (e) {}
 
         let orders = JSON.parse(localStorage.getItem("shop_orders")) || [];

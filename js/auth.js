@@ -9,7 +9,8 @@ async function handleLoginSubmit(e) {
             userId: user.userId,
             name: user.fullName,
             email: user.email,
-            role: user.role
+            role: user.role,
+            token: user.token
         });
         alert(`Đăng nhập thành công! Xin chào, ${user.fullName}`);
         if (user.role === 'admin') {

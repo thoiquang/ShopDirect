@@ -143,7 +143,7 @@ const DataStore = {
 
     getOrders: async function() {
         try {
-            const res = await fetch(`${API_BASE_URL}/orders`);
+            const res = await fetch(`${API_BASE_URL}/orders`, { headers: this.getAuthHeaders() });
             if (res.ok) return await res.json();
         } catch (e) {}
         return JSON.parse(localStorage.getItem("shop_orders")) || [];
@@ -151,7 +151,7 @@ const DataStore = {
 
     getStats: async function() {
         try {
-            const res = await fetch(`${API_BASE_URL}/orders/stats`);
+            const res = await fetch(`${API_BASE_URL}/orders/stats`, { headers: this.getAuthHeaders() });
             if (res.ok) return await res.json();
         } catch (e) {}
         const orders = JSON.parse(localStorage.getItem("shop_orders")) || [];
@@ -166,10 +166,15 @@ const DataStore = {
 
     getUsers: async function() {
         try {
-            const res = await fetch(`${API_BASE_URL}/auth/users`);
+            const res = await fetch(`${API_BASE_URL}/auth/users`, { headers: this.getAuthHeaders() });
             if (res.ok) return await res.json();
         } catch (e) {}
         return fallbackUsers;
+    },
+
+    getAuthHeaders: function() {
+        const user = this.getCurrentUser();
+        return user && user.token ? { Authorization: `Bearer ${user.token}` } : {};
     },
 
     getCart: function() {

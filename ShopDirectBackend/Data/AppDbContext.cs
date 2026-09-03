@@ -12,5 +12,12 @@ namespace ShopDirectBackend.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Product>().Property(product => product.Price).HasPrecision(18, 2);
+            modelBuilder.Entity<Order>().Property(order => order.TotalAmount).HasPrecision(18, 2);
+            modelBuilder.Entity<OrderDetail>().Property(detail => detail.UnitPrice).HasPrecision(18, 2);
+        }
     }
 }

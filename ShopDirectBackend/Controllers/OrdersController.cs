@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ShopDirectBackend.Data;
 using ShopDirectBackend.Models;
@@ -17,6 +18,7 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetOrders()
         {
             var orders = await _context.Orders
@@ -74,6 +76,7 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpPut("{id}/status")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] StatusUpdateRequest request)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -85,6 +88,7 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -96,6 +100,7 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpGet("stats")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetStats()
         {
             var totalRevenue = await _context.Orders.SumAsync(o => (decimal?)o.TotalAmount) ?? 0;

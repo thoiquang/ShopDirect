@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ShopDirectBackend.Data;
 using ShopDirectBackend.Models;
@@ -73,6 +74,7 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> CreateProduct([FromBody] Product product)
         {
             _context.Products.Add(product);
@@ -81,6 +83,7 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product updated)
         {
             var product = await _context.Products.FindAsync(id);
@@ -97,6 +100,7 @@ namespace ShopDirectBackend.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
