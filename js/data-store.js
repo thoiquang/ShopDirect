@@ -99,9 +99,15 @@ const DataStore = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fullName, email, password })
             });
-            if (res.ok) return await res.json();
-        } catch (e) {}
-        return { message: "Đăng ký thành công." };
+            const data = await res.json();
+            if (res.ok) return data;
+            throw new Error(data.message || "Đăng ký thất bại.");
+        } catch (e) {
+            if (e instanceof TypeError) {
+                throw new Error("Không thể kết nối đến máy chủ.");
+            }
+            throw e;
+        }
     },
 
     createOrder: async function(orderPayload) {
@@ -112,7 +118,11 @@ const DataStore = {
                 body: JSON.stringify(orderPayload)
             });
             if (res.ok) return await res.json();
-        } catch (e) {}
+            const error = await res.json().catch(() => ({}));
+            throw new Error(error.message || "Không thể tạo đơn hàng.");
+        } catch (e) {
+            if (!(e instanceof TypeError)) throw e;
+        }
 
         const localOrders = JSON.parse(localStorage.getItem("shop_orders")) || [];
         const newOrder = {

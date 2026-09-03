@@ -6,6 +6,7 @@ async function handleLoginSubmit(e) {
     try {
         const user = await DataStore.login(email, pass);
         DataStore.setCurrentUser({
+            userId: user.userId,
             name: user.fullName,
             email: user.email,
             role: user.role

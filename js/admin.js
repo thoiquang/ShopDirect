@@ -10,7 +10,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     await loadOverviewStats();
+    await loadProductsTable();
     await loadOrdersTable();
+    await loadUsersTable();
 });
 
 // Chuyển Tab
@@ -181,18 +183,18 @@ async function deleteProductHandler(id) {
 
 // 3. Quản lý Đơn hàng & Xem chi tiết
 async function loadOrdersTable() {
-    const orders = await DataStore.getOrders();
-    const table = document.getElementById("admOrdersTable");
-    if (!table) return;
+    allOrders = await DataStore.getOrders();
+    renderOrders(allOrders);
+    const recentTable = document.getElementById("recentOrdersTable");
+    if (!recentTable) return;
 
-    table.innerHTML = "";
-
-    if (!orders || orders.length === 0) {
-        table.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-400 font-medium">Chưa có đơn hàng nào trong hệ thống</td></tr>`;
+    recentTable.innerHTML = "";
+    if (!allOrders || allOrders.length === 0) {
+        recentTable.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-400 font-medium">Chưa có đơn hàng nào trong hệ thống</td></tr>`;
         return;
     }
 
-    [...orders].reverse().forEach(o => {
+    [...allOrders].slice(0, 5).forEach(o => {
         const tr = document.createElement("tr");
         tr.className = "border-b hover:bg-gray-50";
         tr.innerHTML = `
@@ -205,12 +207,13 @@ async function loadOrdersTable() {
             <td class="py-3 px-4 font-bold text-indigo-600">${Number(o.totalAmount).toLocaleString('vi-VN')} đ</td>
             <td class="py-3 px-4 text-xs text-gray-500">${new Date(o.createdAt).toLocaleString('vi-VN')}</td>
         `;
-        table.appendChild(tr);
+        recentTable.appendChild(tr);
     });
 }
 
 function renderOrders(items) {
     const table = document.getElementById("ordersTableBody");
+    if (!table) return;
     table.innerHTML = "";
 
     if (!items || items.length === 0) {
@@ -296,12 +299,17 @@ function closeOrderDetailModal() {
 
 async function changeOrderStatusHandler(orderId, newStatus) {
     try {
-        await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
+        const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newStatus)
+            body: JSON.stringify({ status: newStatus })
         });
-    } catch (e) {}
+        if (!response.ok) throw new Error("Không thể cập nhật trạng thái đơn hàng.");
+        alert("Cập nhật trạng thái thành công!");
+    } catch (e) {
+        alert(e.message || "Không thể cập nhật trạng thái đơn hàng.");
+        return;
+    }
 
     let orders = JSON.parse(localStorage.getItem("shop_orders")) || [];
     const ord = orders.find(o => o.orderId == orderId || o.orderCode == orderId);

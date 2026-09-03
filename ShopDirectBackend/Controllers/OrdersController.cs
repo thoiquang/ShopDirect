@@ -43,6 +43,7 @@ namespace ShopDirectBackend.Controllers
         {
             var order = new Order
             {
+                UserId = request.UserId,
                 OrderCode = "HD" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()[^6..],
                 CustomerName = request.CustomerName,
                 CustomerPhone = request.CustomerPhone,
@@ -114,6 +115,7 @@ namespace ShopDirectBackend.Controllers
 
     public class OrderRequest
     {
+        public int? UserId { get; set; }
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerPhone { get; set; } = string.Empty;
         public string CustomerAddress { get; set; } = string.Empty;

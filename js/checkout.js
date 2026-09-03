@@ -61,27 +61,31 @@ function renderCheckoutSummary() {
     finalTotalElem.innerText = `${Number(total).toLocaleString('vi-VN')} đ`;
 }
 
-function handlePlaceOrder() {
+async function handlePlaceOrder() {
     const cart = DataStore.getCart();
     const user = DataStore.getCurrentUser();
+    const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const orderData = {
-        userId: user ? user.userId : 1,
-        fullName: document.getElementById("fullName").value,
-        phone: document.getElementById("phone").value,
-        email: document.getElementById("email").value,
-        address: document.getElementById("address").value,
+        userId: user.userId,
+        customerName: document.getElementById("fullName").value.trim(),
+        customerPhone: document.getElementById("phone").value.trim(),
+        customerAddress: document.getElementById("address").value.trim(),
+        totalAmount,
         paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
-        items: cart
+        items: cart.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: item.price
+        }))
     };
 
-    // Giả lập lưu đơn hàng thành công và xóa giỏ hàng
-    console.log("Đã gửi đơn hàng:", orderData);
-    alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại ShopDirect.");
-    
-    // Xóa giỏ hàng
-    localStorage.removeItem("shop_cart");
-
-    // Điều hướng về trang chủ
-    window.location.href = "home.html";
+    try {
+        await DataStore.createOrder(orderData);
+        alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại ShopDirect.");
+        localStorage.removeItem("shop_cart");
+        window.location.href = "home.html";
+    } catch (error) {
+        alert(error.message || "Không thể đặt hàng. Vui lòng thử lại.");
+    }
 }
