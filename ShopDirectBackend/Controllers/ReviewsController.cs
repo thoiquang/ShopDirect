@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopDirectBackend.Data;
 using ShopDirectBackend.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ShopDirectBackend.Controllers
 {
@@ -38,10 +41,20 @@ namespace ShopDirectBackend.Controllers
 
         // Thêm đánh giá mới
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateReview([FromBody] Review review)
         {
             if (review == null || review.Rating < 1 || review.Rating > 5)
                 return BadRequest(new { message = "Dữ liệu đánh giá không hợp lệ." });
+
+            var userIdClaim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
+
+            if (!await _context.Products.AnyAsync(product => product.ProductId == review.ProductId))
+                return NotFound(new { message = "Không tìm thấy sản phẩm." });
+
+            review.UserId = userId;
 
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();

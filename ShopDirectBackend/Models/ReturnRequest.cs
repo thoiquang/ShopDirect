@@ -8,6 +8,7 @@ namespace ShopDirectBackend.Models
     public class ReturnRequest
     {
         [Key]
+        [Column("ReturnRequestId")]
         public int ReturnId { get; set; }
 
         [Required]
@@ -19,7 +20,8 @@ namespace ShopDirectBackend.Models
         [Required]
         public string Reason { get; set; } = null!;
 
-        public string ReturnStatus { get; set; } = "Đang chờ duyệt";
+        [Column("Status")]
+        public string ReturnStatus { get; set; } = "Chờ duyệt";
 
         public string? AdminNote { get; set; }
 

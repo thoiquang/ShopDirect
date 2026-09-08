@@ -114,7 +114,7 @@ const DataStore = {
         try {
             const res = await fetch(`${API_BASE_URL}/orders`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() },
                 body: JSON.stringify(orderPayload)
             });
             if (res.ok) return await res.json();
@@ -186,7 +186,7 @@ const DataStore = {
 
     getReviews: async function(productId) {
         try {
-            const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews`);
+            const res = await fetch(`${API_BASE_URL}/reviews/product/${productId}`);
             if (res.ok) return await res.json();
         } catch (e) {}
         return (JSON.parse(localStorage.getItem("shop_reviews")) || []).filter(review => String(review.productId) === String(productId));
@@ -195,7 +195,7 @@ const DataStore = {
     createReview: async function(productId, review) {
         const localReview = { ...review, productId: String(productId), createdAt: new Date().toISOString() };
         try {
-            const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews`, {
+            const res = await fetch(`${API_BASE_URL}/reviews`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() }, body: JSON.stringify(review)
             });
             if (res.ok) return await res.json();

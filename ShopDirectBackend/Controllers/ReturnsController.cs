@@ -35,7 +35,7 @@ namespace ShopDirectBackend.Controllers
             if (order == null) return NotFound(new { message = "Không tìm thấy đơn hàng của bạn." });
             if (order.OrderStatus != "Hoàn tất") return BadRequest(new { message = "Chỉ có thể trả hàng sau khi đơn hoàn tất." });
 
-            var exists = await _context.ReturnRequests.AnyAsync(item => item.OrderId == request.OrderId && item.UserId == userId && item.Status == "Chờ duyệt");
+            var exists = await _context.ReturnRequests.AnyAsync(item => item.OrderId == request.OrderId && item.UserId == userId && item.ReturnStatus == "Chờ duyệt");
             if (exists) return BadRequest(new { message = "Đơn hàng này đã có yêu cầu trả hàng." });
 
             var result = new ReturnRequest { OrderId = request.OrderId, UserId = userId, Reason = request.Reason.Trim() };
@@ -54,7 +54,7 @@ namespace ShopDirectBackend.Controllers
         {
             var item = await _context.ReturnRequests.FindAsync(id);
             if (item == null) return NotFound();
-            item.Status = request.Status;
+            item.ReturnStatus = request.Status;
             await _context.SaveChangesAsync();
             return Ok(item);
         }
