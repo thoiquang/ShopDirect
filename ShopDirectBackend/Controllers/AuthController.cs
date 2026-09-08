@@ -26,8 +26,13 @@ namespace ShopDirectBackend.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == request.Email && u.PasswordHash == request.Password);
+            var identifier = request.Email.Trim();
+            var normalizedPhone = NormalizePhone(identifier);
+            var users = await _context.Users.ToListAsync();
+            var user = users.FirstOrDefault(item =>
+                item.PasswordHash == request.Password &&
+                (string.Equals(item.Email?.Trim(), identifier, StringComparison.OrdinalIgnoreCase) ||
+                 NormalizePhone(item.Phone) == normalizedPhone));
 
             if (user == null)
             {
@@ -56,6 +61,15 @@ namespace ShopDirectBackend.Controllers
                 role,
                 token = new JwtSecurityTokenHandler().WriteToken(token)
             });
+        }
+
+        private static string NormalizePhone(string? phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone)) return string.Empty;
+            var digits = new string(phone.Where(char.IsDigit).ToArray());
+            if (digits.StartsWith("84") && digits.Length == 11)
+                return "0" + digits[2..];
+            return digits;
         }
 
         [HttpGet("me")]
@@ -99,6 +113,13 @@ namespace ShopDirectBackend.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.FullName) || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.Phone))
+                return BadRequest(new { message = "Họ tên, email, mật khẩu và số điện thoại là bắt buộc." });
+
+            var normalizedPhone = request.Phone.Trim();
+            if (normalizedPhone.Length < 9 || normalizedPhone.Length > 11 || !normalizedPhone.All(char.IsDigit))
+                return BadRequest(new { message = "Số điện thoại phải gồm 9 đến 11 chữ số." });
+
             var exists = await _context.Users.AnyAsync(u => u.Email == request.Email);
             if (exists)
             {
@@ -110,6 +131,7 @@ namespace ShopDirectBackend.Controllers
                 FullName = request.FullName,
                 Email = request.Email,
                 PasswordHash = request.Password,
+                Phone = normalizedPhone,
                 RoleId = 2
             };
 
@@ -148,6 +170,7 @@ namespace ShopDirectBackend.Controllers
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
     }
 
     public class ProfileUpdateRequest

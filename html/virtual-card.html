@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thẻ ShopDirect ảo</title>
+    <script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="text-gray-800 flex flex-col min-h-screen"><div id="navbarContainer"></div>
+<main class="flex-1 container mx-auto px-4 py-8"><div class="max-w-xl mx-auto"><p class="shop-section-label mb-1">ShopDirect Pay / demo</p><h1 class="text-3xl font-bold mb-2">Thẻ ngân hàng ảo</h1><p class="text-sm text-gray-500 mb-6">Thẻ chỉ tồn tại trong tài khoản trình duyệt này để mô phỏng thanh toán nội bộ.</p><section class="shop-panel bg-white border rounded-2xl p-6"><div id="cardPreview"></div><form id="cardForm" class="space-y-4 mt-6"><div><label class="block text-sm font-semibold mb-1">Tên chủ thẻ</label><input id="cardName" required class="w-full border rounded-lg px-3 py-2" placeholder="NGUYEN VAN A"></div><button class="shop-action w-full rounded-lg py-3 font-bold" type="submit"><i class="fa-solid fa-plus mr-2"></i>Tạo / cập nhật thẻ ảo</button></form><p id="cardMessage" class="text-sm mt-4"></p></section></div></main><div id="footerContainer"></div>
+<script src="../js/data-store.js"></script><script src="../js/navbar.js"></script><script src="../js/virtual-card.js"></script></body></html>

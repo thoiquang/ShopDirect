@@ -92,12 +92,12 @@ const DataStore = {
         }
     },
 
-    register: async function(fullName, email, password) {
+    register: async function(fullName, email, password, phone) {
         try {
             const res = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fullName, email, password })
+                body: JSON.stringify({ fullName, email, password, phone })
             });
             const data = await res.json();
             if (res.ok) return data;
@@ -236,6 +236,27 @@ const DataStore = {
             if (res.ok) return await res.json();
         } catch (e) {}
         return fallbackUsers;
+    },
+
+    getVirtualCard: async function() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/virtual-cards/mine`, { headers: this.getAuthHeaders() });
+            if (!res.ok) return null;
+            return await res.json();
+        } catch (error) {
+            return null;
+        }
+    },
+
+    createVirtualCard: async function(userId, cardholderName) {
+        const res = await fetch(`${API_BASE_URL}/virtual-cards`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() },
+            body: JSON.stringify({ userId, cardholderName })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.message || 'Không thể cấp thẻ ảo.');
+        return data;
     },
 
     getAuthHeaders: function() {

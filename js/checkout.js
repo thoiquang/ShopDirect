@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const user = DataStore.getCurrentUser();
     const cart = DataStore.getCart();
 
@@ -14,7 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    // Tự động điền thông tin nếu có sẵn từ tài khoản
+    // Ưu tiên dữ liệu mới nhất từ hồ sơ server khi phiên đăng nhập đã có token.
+    if (user.token) {
+        const profile = await DataStore.getProfile();
+        if (profile) {
+            Object.assign(user, profile, { name: profile.fullName || user.name });
+            DataStore.setCurrentUser(user);
+        }
+    }
+
+    // Tự động điền thông tin nếu có sẵn từ tài khoản; ô điện thoại vẫn cho phép sửa/xóa.
     if (user.fullName) document.getElementById("fullName").value = user.fullName;
     if (user.email) document.getElementById("email").value = user.email;
     if (user.phone) document.getElementById("phone").value = user.phone;
@@ -79,6 +88,17 @@ async function handlePlaceOrder() {
             unitPrice: item.price
         }))
     };
+
+    if (orderData.paymentMethod === "QR" || orderData.paymentMethod === "CARD") {
+        sessionStorage.setItem("shop_pending_checkout", JSON.stringify({
+            orderData,
+            paymentMethod: orderData.paymentMethod,
+            totalAmount,
+            orderCode: `HD${Date.now().toString().slice(-6)}`
+        }));
+        window.location.href = "payment.html";
+        return;
+    }
 
     try {
         const order = await DataStore.createOrder(orderData);

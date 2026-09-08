@@ -8,7 +8,10 @@ async function handleLoginSubmit(e) {
         DataStore.setCurrentUser({
             userId: user.userId,
             name: user.fullName,
+            fullName: user.fullName,
             email: user.email,
+            phone: user.phone || '',
+            address: user.address || '',
             role: user.role,
             token: user.token
         });
@@ -28,9 +31,10 @@ async function handleRegisterSubmit(e) {
     const name = document.getElementById("regName").value.trim();
     const email = document.getElementById("regEmail").value.trim();
     const pass = document.getElementById("regPass").value.trim();
+    const phone = document.getElementById("regPhone").value.trim();
 
     try {
-        await DataStore.register(name, email, pass);
+        await DataStore.register(name, email, pass, phone);
         alert("Đăng ký tài khoản thành công! Mời bạn đăng nhập.");
         window.location.href = "login.html";
     } catch (err) {

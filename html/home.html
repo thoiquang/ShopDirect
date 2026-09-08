@@ -8,28 +8,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+<body class="text-gray-800 flex flex-col min-h-screen">
     
     <div id="navbarContainer"></div>
 
     <main class="flex-1 container mx-auto px-4 py-6">
         
-<section class="mb-8">
-    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
-        <div>
-            <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Ưu Đãi Bán Hàng Trực Tiếp!</h1>
-            <p class="text-indigo-100 mb-4">Sản phẩm chính hãng, giao hàng nhanh chóng, hỗ trợ thanh toán trực tiếp linh hoạt.</p>
-            <a href="home.html" class="inline-block bg-white text-indigo-600 px-6 py-2.5 rounded-lg font-bold hover:bg-indigo-50 transition shadow">Khám phá ngay</a>
+<section class="shop-hero mb-10 p-7 md:p-12">
+    <div class="shop-hero-content flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+        <div class="max-w-2xl">
+            <p class="shop-kicker mb-3">ShopDirect / mua sắm trực tiếp</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight text-white mb-4">Món đồ đúng gu.<br><span class="text-cyan-200">Giao đến đúng lúc.</span></h1>
+            <p class="text-blue-100 max-w-xl mb-7">Khám phá sản phẩm được chọn lọc, giá minh bạch và trải nghiệm mua hàng gọn gàng cho mỗi ngày.</p>
+            <a href="#productGrid" class="shop-action inline-flex items-center gap-2 px-5 py-3 rounded-lg font-bold transition"><span>Xem sản phẩm</span><i class="fa-solid fa-arrow-right"></i></a>
         </div>
-        <div class="text-6xl text-indigo-200 hidden md:block">
+        <div class="hidden md:flex w-40 h-40 rounded-full border border-white/20 bg-white/10 items-center justify-center text-white/80 text-6xl rotate-6">
             <i class="fa-solid fa-bag-shopping"></i>
         </div>
     </div>
 </section>
 
 <div class="flex justify-between items-center mb-6">
-    <h2 id="pageTitle" class="text-2xl font-bold text-gray-800">Tất cả sản phẩm</h2>
-    <span id="productCount" class="text-sm text-gray-500">Hiển thị 0 sản phẩm</span>
+    <div><p class="shop-section-label mb-1">Bộ sưu tập hôm nay</p><h2 id="pageTitle" class="text-2xl font-bold text-gray-800">Tất cả sản phẩm</h2></div>
+    <span id="productCount" class="text-sm text-gray-500">0 sản phẩm</span>
 </div>
 
 <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

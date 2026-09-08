@@ -354,14 +354,25 @@ async function loadUsersTable() {
                     ${u.role}
                 </span>
             </td>
+            <td class="py-3 px-4 text-center"><button onclick="issueVirtualCard(${u.userId}, '${(u.fullName || u.name || '').replace(/'/g, "\\'")}')" class="text-blue-700 hover:bg-blue-50 border border-blue-200 rounded px-2 py-1 text-xs font-semibold">Cấp thẻ ảo</button></td>
         `;
         table.appendChild(tr);
     });
 }
 
+async function issueVirtualCard(userId, userName) {
+    try {
+        await DataStore.createVirtualCard(userId, userName);
+        alert(`Đã cấp thẻ ảo cho ${userName}.`);
+    } catch (error) {
+        alert(error.message || "Không thể cấp thẻ ảo.");
+    }
+}
+
 function openUserModal() {
     document.getElementById("newFullName").value = "";
     document.getElementById("newEmail").value = "";
+    document.getElementById("newPhone").value = "";
     document.getElementById("newPassword").value = "";
     document.getElementById("newRole").value = "user";
     document.getElementById("userModal").classList.remove("hidden");
@@ -375,15 +386,47 @@ async function handleCreateUser(e) {
     e.preventDefault();
     const fullName = document.getElementById("newFullName").value.trim();
     const email = document.getElementById("newEmail").value.trim();
+    const phone = document.getElementById("newPhone").value.trim();
     const password = document.getElementById("newPassword").value.trim();
     const role = document.getElementById("newRole").value;
 
     try {
-        await DataStore.register(fullName, email, password);
+        await DataStore.register(fullName, email, password, phone);
     } catch (e) {}
 
     closeUserModal();
     await loadUsersTable();
     await loadOverviewStats();
     alert(`Đã tạo tài khoản "${fullName}" (${role}) thành công!`);
+}
+
+function loadTopupRequestsTable() {
+    const table = document.getElementById("topupRequestsTable");
+    if (!table) return;
+    const requests = JSON.parse(localStorage.getItem("shop_topup_requests") || "[]");
+    if (!requests.length) {
+        table.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-gray-400">Chưa có yêu cầu nạp ví nào.</td></tr>';
+        return;
+    }
+
+    table.innerHTML = requests.slice().reverse().map(request => {
+        const statusClass = request.status === "Đã duyệt" ? "bg-green-50 text-green-700" : request.status === "Từ chối" ? "bg-red-50 text-red-700" : "bg-orange-50 text-orange-700";
+        const actions = request.status === "Chờ duyệt" ? `<button onclick="reviewTopup(${request.id}, 'Đã duyệt')" class="text-green-700 hover:bg-green-50 border border-green-200 rounded px-2 py-1 mr-1">Duyệt</button><button onclick="reviewTopup(${request.id}, 'Từ chối')" class="text-red-700 hover:bg-red-50 border border-red-200 rounded px-2 py-1">Từ chối</button>` : '<span class="text-xs text-gray-400">Đã xử lý</span>';
+        return `<tr class="border-b hover:bg-gray-50"><td class="py-3 px-4 font-semibold">${request.userName || `User #${request.userId}`}</td><td class="py-3 px-4 font-bold text-blue-700">${Number(request.amount).toLocaleString('vi-VN')} đ</td><td class="py-3 px-4 text-xs">${new Date(request.createdAt).toLocaleString('vi-VN')}</td><td class="py-3 px-4"><span class="${statusClass} text-xs font-bold px-2 py-1 rounded-full">${request.status}</span></td><td class="py-3 px-4 text-center">${actions}</td></tr>`;
+    }).join("");
+}
+
+function reviewTopup(requestId, status) {
+    const requests = JSON.parse(localStorage.getItem("shop_topup_requests") || "[]");
+    const request = requests.find(item => item.id === requestId);
+    if (!request || request.status !== "Chờ duyệt") return;
+
+    request.status = status;
+    if (status === "Đã duyệt") {
+        const balances = JSON.parse(localStorage.getItem("shop_wallet_balances") || "{}");
+        balances[request.userId] = Number(balances[request.userId] || 0) + Number(request.amount);
+        localStorage.setItem("shop_wallet_balances", JSON.stringify(balances));
+    }
+    localStorage.setItem("shop_topup_requests", JSON.stringify(requests));
+    loadTopupRequestsTable();
 }

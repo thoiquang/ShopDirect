@@ -14,7 +14,7 @@
 
     <main class="flex-1 container mx-auto px-4 py-6">
         
-<div class="max-w-md mx-auto bg-white rounded-2xl shadow-sm border p-6">
+<div class="shop-panel max-w-md mx-auto bg-white rounded-2xl shadow-sm border p-6">
     <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">Đăng Ký Tài Khoản Mới</h1>
     <form onsubmit="handleRegisterSubmit(event)" class="space-y-4">
         <div>
@@ -24,6 +24,10 @@
         <div>
             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Email *</label>
             <input type="email" id="regEmail" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="nguyenvana@gmail.com">
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Số điện thoại *</label>
+            <input type="tel" id="regPhone" required inputmode="numeric" pattern="[0-9]{9,11}" maxlength="11" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0912345678">
         </div>
         <div>
             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Mật khẩu *</label>

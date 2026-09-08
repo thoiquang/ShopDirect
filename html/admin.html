@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+<body class="admin-shell min-h-screen flex flex-col">
 
     <!-- Header Admin -->
-    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg border-b border-slate-800">
+    <header class="admin-header text-white sticky top-0 z-40 shadow-lg">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <a href="home.html" class="text-xl font-bold tracking-wide flex items-center gap-2 text-indigo-400 hover:text-indigo-300">
@@ -227,6 +227,7 @@
                                 <th class="py-3 px-4">Họ và tên</th>
                                 <th class="py-3 px-4">Email</th>
                                 <th class="py-3 px-4">Vai trò</th>
+                                <th class="py-3 px-4 text-center">Thẻ ảo</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody"></tbody>
@@ -327,6 +328,10 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Email đăng nhập *</label>
                     <input type="email" id="newEmail" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Số điện thoại *</label>
+                    <input type="tel" id="newPhone" required inputmode="numeric" pattern="[0-9]{9,11}" maxlength="11" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Mật khẩu *</label>
