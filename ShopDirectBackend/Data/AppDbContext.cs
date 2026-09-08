@@ -22,7 +22,7 @@ namespace ShopDirectBackend.Data
             modelBuilder.Entity<OrderDetail>().Property(detail => detail.UnitPrice).HasPrecision(18, 2);
             modelBuilder.Entity<Review>().Property(review => review.Comment).HasMaxLength(1000);
             modelBuilder.Entity<ReturnRequest>().Property(item => item.Reason).HasMaxLength(1000);
-            modelBuilder.Entity<ReturnRequest>().Property(item => item.Status).HasMaxLength(50);
+            modelBuilder.Entity<ReturnRequest>().Property(item => item.ReturnStatus).HasMaxLength(50);
         }
     }
 }

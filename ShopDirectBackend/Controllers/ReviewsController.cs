@@ -1,58 +1,52 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopDirectBackend.Data;
 using ShopDirectBackend.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace ShopDirectBackend.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/products/{productId}/reviews")]
     public class ReviewsController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public ReviewsController(AppDbContext context) => _context = context;
-
-        [HttpGet]
-        public async Task<IActionResult> GetReviews(int productId)
+        public ReviewsController(AppDbContext context)
         {
-            var reviews = await _context.Reviews.Where(review => review.ProductId == productId)
-                .OrderByDescending(review => review.CreatedAt).ToListAsync();
+            _context = context;
+        }
+
+        // Lấy danh sách đánh giá của 1 sản phẩm
+        [HttpGet("product/{productId}")]
+        public async Task<IActionResult> GetReviewsByProduct(int productId)
+        {
+            var reviews = await _context.Reviews
+                .Include(r => r.User)
+                .Where(r => r.ProductId == productId)
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new {
+                    r.ReviewId,
+                    r.Rating,
+                    r.Comment,
+                    r.CreatedAt,
+                    CustomerName = r.User != null ? r.User.FullName : "Khách hàng"
+                })
+                .ToListAsync();
+
             return Ok(reviews);
         }
 
+        // Thêm đánh giá mới
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> CreateReview(int productId, [FromBody] ReviewRequest request)
+        public async Task<IActionResult> CreateReview([FromBody] Review review)
         {
-            if (request.Rating < 1 || request.Rating > 5 || string.IsNullOrWhiteSpace(request.Comment))
-                return BadRequest(new { message = "Đánh giá phải có từ 1 đến 5 sao và nội dung." });
+            if (review == null || review.Rating < 1 || review.Rating > 5)
+                return BadRequest(new { message = "Dữ liệu đánh giá không hợp lệ." });
 
-            var review = new Review
-            {
-                ProductId = productId,
-                UserId = GetUserId(),
-                Rating = request.Rating,
-                Comment = request.Comment.Trim()
-            };
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
-            return Ok(review);
-        }
 
-        private int GetUserId()
-        {
-            var claim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return int.Parse(claim ?? throw new UnauthorizedAccessException());
+            return Ok(new { message = "Cảm ơn bạn đã đánh giá sản phẩm!" });
         }
-    }
-
-    public class ReviewRequest
-    {
-        public int Rating { get; set; }
-        public string Comment { get; set; } = string.Empty;
     }
 }
