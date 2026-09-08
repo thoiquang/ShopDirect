@@ -77,7 +77,7 @@ namespace ShopDirectBackend.Controllers
 
         private static string GenerateCardNumber() => $"SD{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{Random.Shared.Next(1000, 9999)}";
         private static string Mask(string number) => $"**** **** **** {number[^4..]}";
-        private static object ToResponse(VirtualCard card) => new { card.VirtualCardId, card.UserId, card.CardholderName, card.CardNumber, card.Expiry, card.IsActive, card.CreatedAt };
+        private static object ToResponse(VirtualCard card) => new { card.VirtualCardId, card.UserId, card.CardholderName, card.CardNumber, MaskedNumber = Mask(card.CardNumber), card.Expiry, card.IsActive, card.CreatedAt };
     }
 
     public class CreateVirtualCardRequest

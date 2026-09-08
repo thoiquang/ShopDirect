@@ -51,6 +51,9 @@
             <button id="tabBtn_users" onclick="switchAdminTab('users')" class="px-4 py-2 rounded-lg font-semibold text-sm bg-white text-gray-600 hover:bg-gray-50 border transition flex items-center gap-2">
                 <i class="fa-solid fa-users-gear"></i> Quản lý tài khoản
             </button>
+            <button id="tabBtn_cards" onclick="switchAdminTab('cards')" class="px-4 py-2 rounded-lg font-semibold text-sm bg-white text-gray-600 hover:bg-gray-50 border transition flex items-center gap-2">
+                <i class="fa-solid fa-credit-card"></i> Quản lý thẻ ảo
+            </button>
         </div>
 
         <!-- 1. TỔNG QUAN -->
@@ -227,13 +230,44 @@
                                 <th class="py-3 px-4">Họ và tên</th>
                                 <th class="py-3 px-4">Email</th>
                                 <th class="py-3 px-4">Vai trò</th>
-                                <th class="py-3 px-4 text-center">Thẻ ảo</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody"></tbody>
                     </table>
                 </div>
             </div>
+        </div>
+
+        <div id="sec_cards" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                <div class="mb-6"><h3 class="font-bold text-gray-800 text-lg">Tạo thẻ ngân hàng ảo</h3><p class="text-xs text-gray-500 mt-1">Chọn tài khoản khách hàng, nhập tên trên thẻ, hệ thống sẽ tự sinh số thẻ.</p></div>
+                <form id="virtualCardPageForm" onsubmit="handlePageIssueVirtualCard(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div><label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tài khoản khách hàng *</label><select id="pageCardUserId" required class="w-full border rounded-lg px-3 py-2 text-sm"></select></div>
+                    <div><label class="block text-xs font-bold text-gray-600 uppercase mb-1">Họ tên trên thẻ *</label><input id="pageCardholderName" required maxlength="80" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="NGUYEN VAN A"></div>
+                    <button class="bg-blue-700 hover:bg-blue-800 text-white font-bold px-4 py-2.5 rounded-lg" type="submit"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Tạo thẻ</button>
+                </form>
+                <div id="pageIssuedVirtualCard" class="hidden mt-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CẤP THẺ ẢO -->
+    <div id="virtualCardModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div onclick="closeVirtualCardModal()" class="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 z-10 relative shadow-2xl">
+            <button onclick="closeVirtualCardModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <p class="shop-section-label mb-1">ShopDirect Pay / Admin</p>
+            <h3 class="text-xl font-bold text-gray-800 mb-1">Cấp thẻ ngân hàng ảo</h3>
+            <p id="virtualCardUserLabel" class="text-sm text-gray-500 mb-5"></p>
+            <form id="virtualCardForm" onsubmit="handleIssueVirtualCard(event)" class="space-y-4">
+                <input type="hidden" id="virtualCardUserId">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Họ tên trên thẻ *</label>
+                    <input type="text" id="virtualCardholderName" required maxlength="80" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="NGUYEN VAN A">
+                </div>
+                <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg transition"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Tạo thẻ ngẫu nhiên</button>
+            </form>
+            <div id="issuedVirtualCard" class="hidden mt-5"></div>
         </div>
     </div>
 

@@ -249,13 +249,18 @@ const DataStore = {
     },
 
     createVirtualCard: async function(userId, cardholderName) {
-        const res = await fetch(`${API_BASE_URL}/virtual-cards`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() },
-            body: JSON.stringify({ userId, cardholderName })
-        });
+        let res;
+        try {
+            res = await fetch(`${API_BASE_URL}/virtual-cards`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() },
+                body: JSON.stringify({ userId, cardholderName })
+            });
+        } catch (error) {
+            throw new Error('Không kết nối được backend. Hãy kiểm tra backend đang chạy ở cổng 5025.');
+        }
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.message || 'Không thể cấp thẻ ảo.');
+        if (!res.ok) throw new Error(data.message || `Không thể cấp thẻ ảo (HTTP ${res.status}).`);
         return data;
     },
 

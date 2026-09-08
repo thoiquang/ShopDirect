@@ -13,11 +13,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadProductsTable();
     await loadOrdersTable();
     await loadUsersTable();
+    await loadCardUsers();
 });
 
 // Chuyển Tab
 function switchAdminTab(tab) {
-    const tabs = ['overview', 'products', 'orders', 'users'];
+    const tabs = ['overview', 'products', 'orders', 'users', 'cards'];
     tabs.forEach(t => {
         const sec = document.getElementById(`sec_${t}`);
         const btn = document.getElementById(`tabBtn_${t}`);
@@ -354,18 +355,63 @@ async function loadUsersTable() {
                     ${u.role}
                 </span>
             </td>
-            <td class="py-3 px-4 text-center"><button onclick="issueVirtualCard(${u.userId}, '${(u.fullName || u.name || '').replace(/'/g, "\\'")}')" class="text-blue-700 hover:bg-blue-50 border border-blue-200 rounded px-2 py-1 text-xs font-semibold">Cấp thẻ ảo</button></td>
         `;
         table.appendChild(tr);
     });
 }
 
-async function issueVirtualCard(userId, userName) {
+async function loadCardUsers() {
+    const select = document.getElementById("pageCardUserId");
+    if (!select) return;
+    const users = await DataStore.getUsers();
+    select.innerHTML = '<option value="">Chọn tài khoản khách hàng</option>' + users.filter(user => user.role !== "admin").map(user => `<option value="${user.userId}" data-name="${user.fullName || user.name || ''}">${user.fullName || user.name} - ${user.email}</option>`).join("");
+    select.onchange = () => {
+        const option = select.options[select.selectedIndex];
+        document.getElementById("pageCardholderName").value = option.dataset.name || "";
+    };
+}
+
+async function handlePageIssueVirtualCard(event) {
+    event.preventDefault();
+    const userId = Number(document.getElementById("pageCardUserId").value);
+    const cardholderName = document.getElementById("pageCardholderName").value.trim();
+    const result = document.getElementById("pageIssuedVirtualCard");
     try {
-        await DataStore.createVirtualCard(userId, userName);
-        alert(`Đã cấp thẻ ảo cho ${userName}.`);
+        const card = await DataStore.createVirtualCard(userId, cardholderName);
+        result.innerHTML = `<div class="issued-card-result"><p class="text-xs uppercase tracking-widest text-blue-100">Thẻ đã tạo thành công</p><p class="text-2xl font-bold tracking-widest mt-5">${card.cardNumber}</p><div class="flex justify-between text-xs mt-4"><span>${card.cardholderName}</span><span>HSD ${card.expiry}</span></div></div>`;
+        result.classList.remove("hidden");
     } catch (error) {
-        alert(error.message || "Không thể cấp thẻ ảo.");
+        result.innerHTML = `<p class="text-sm text-red-600">${error.message || "Không thể tạo thẻ ảo."}</p>`;
+        result.classList.remove("hidden");
+    }
+}
+
+function openVirtualCardModal(userId, userName) {
+    document.getElementById("virtualCardUserId").value = userId;
+    document.getElementById("virtualCardUserLabel").innerText = `Khách hàng: ${userName}`;
+    document.getElementById("virtualCardholderName").value = userName.toUpperCase();
+    document.getElementById("issuedVirtualCard").classList.add("hidden");
+    document.getElementById("virtualCardForm").classList.remove("hidden");
+    document.getElementById("virtualCardModal").classList.remove("hidden");
+}
+
+function closeVirtualCardModal() {
+    document.getElementById("virtualCardModal").classList.add("hidden");
+}
+
+async function handleIssueVirtualCard(event) {
+    event.preventDefault();
+    const userId = Number(document.getElementById("virtualCardUserId").value);
+    const cardholderName = document.getElementById("virtualCardholderName").value.trim();
+    const result = document.getElementById("issuedVirtualCard");
+    try {
+        const card = await DataStore.createVirtualCard(userId, cardholderName);
+        result.innerHTML = `<div class="issued-card-result"><p class="text-xs uppercase tracking-widest text-blue-100">Thẻ đã tạo thành công</p><p class="text-2xl font-bold tracking-widest mt-5">${card.cardNumber}</p><div class="flex justify-between text-xs mt-4"><span>${card.cardholderName}</span><span>HSD ${card.expiry}</span></div></div><p class="text-xs text-gray-500 mt-3">Hãy lưu số thẻ này. Khách hàng chỉ nhìn thấy 4 số cuối.</p>`;
+        result.classList.remove("hidden");
+        document.getElementById("virtualCardForm").classList.add("hidden");
+    } catch (error) {
+        result.innerHTML = `<p class="text-sm text-red-600">${error.message || "Không thể cấp thẻ ảo."}</p>`;
+        result.classList.remove("hidden");
     }
 }
 

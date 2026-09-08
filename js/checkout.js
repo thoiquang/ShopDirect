@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (user.address) document.getElementById("address").value = user.address;
 
     renderCheckoutSummary();
+    renderCheckoutWalletBalance();
 
     // Lắng nghe sự kiện submit đặt hàng
     const checkoutForm = document.getElementById("checkoutForm");
@@ -70,6 +71,13 @@ function renderCheckoutSummary() {
     finalTotalElem.innerText = `${Number(total).toLocaleString('vi-VN')} đ`;
 }
 
+function renderCheckoutWalletBalance() {
+    const user = DataStore.getCurrentUser();
+    const balances = JSON.parse(localStorage.getItem("shop_wallet_balances") || "{}");
+    const element = document.getElementById("checkoutWalletBalance");
+    if (element) element.innerText = `(${Number(balances[user.userId] || 0).toLocaleString("vi-VN")} đ)`;
+}
+
 async function handlePlaceOrder() {
     const cart = DataStore.getCart();
     const user = DataStore.getCurrentUser();
@@ -89,6 +97,12 @@ async function handlePlaceOrder() {
         }))
     };
 
+    const walletBalances = JSON.parse(localStorage.getItem("shop_wallet_balances") || "{}");
+    if (orderData.paymentMethod === "WALLET" && Number(walletBalances[user.userId] || 0) < totalAmount) {
+        alert("Số dư ví không đủ để thanh toán đơn hàng này.");
+        return;
+    }
+
     if (orderData.paymentMethod === "QR" || orderData.paymentMethod === "CARD") {
         sessionStorage.setItem("shop_pending_checkout", JSON.stringify({
             orderData,
@@ -102,6 +116,10 @@ async function handlePlaceOrder() {
 
     try {
         const order = await DataStore.createOrder(orderData);
+        if (orderData.paymentMethod === "WALLET") {
+            walletBalances[user.userId] = Number(walletBalances[user.userId] || 0) - totalAmount;
+            localStorage.setItem("shop_wallet_balances", JSON.stringify(walletBalances));
+        }
         alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại ShopDirect.");
         localStorage.removeItem("shop_cart");
         window.location.href = `invoice.html?id=${order.orderId}`;

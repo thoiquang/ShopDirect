@@ -189,6 +189,14 @@ main.container {
     box-shadow: 0 14px 28px rgba(6, 55, 125, 0.2);
 }
 
+.issued-card-result {
+    color: #fff;
+    background: linear-gradient(135deg, #06377d, #0878c9 62%, #ff7657);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 12px 24px rgba(6, 55, 125, 0.18);
+}
+
 @media (max-width: 640px) {
     .shop-hero {
         border-radius: 18px;
