@@ -20,7 +20,7 @@ namespace ShopDirectBackend.Models
         public string CardNumber { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(4)]
+        [MaxLength(10)]
         public string Expiry { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;

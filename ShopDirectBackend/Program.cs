@@ -74,11 +74,25 @@ BEGIN
         [UserId] int NOT NULL,
         [CardholderName] nvarchar(80) NOT NULL,
         [CardNumber] nvarchar(32) NOT NULL,
-        [Expiry] nvarchar(4) NOT NULL,
+        [Expiry] nvarchar(10) NOT NULL,
         [IsActive] bit NOT NULL CONSTRAINT [DF_VirtualCards_IsActive] DEFAULT (1),
         [CreatedAt] datetime NOT NULL CONSTRAINT [DF_VirtualCards_CreatedAt] DEFAULT (getdate()),
         CONSTRAINT [FK_VirtualCards_Users] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users]([UserId]),
         CONSTRAINT [UQ_VirtualCards_CardNumber] UNIQUE ([CardNumber])
     );
+END
+ELSE
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM sys.columns c
+        INNER JOIN sys.tables t ON t.object_id = c.object_id
+        WHERE t.name = N'VirtualCards'
+          AND c.name = N'Expiry'
+          AND c.max_length < 20
+    )
+    BEGIN
+        ALTER TABLE [dbo].[VirtualCards] ALTER COLUMN [Expiry] nvarchar(10) NOT NULL;
+    END
 END");
 }

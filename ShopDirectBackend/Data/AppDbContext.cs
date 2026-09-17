@@ -24,6 +24,7 @@ namespace ShopDirectBackend.Data
             modelBuilder.Entity<Review>().Property(review => review.Comment).HasMaxLength(1000);
             modelBuilder.Entity<ReturnRequest>().Property(item => item.Reason).HasMaxLength(1000);
             modelBuilder.Entity<ReturnRequest>().Property(item => item.ReturnStatus).HasMaxLength(50);
+            modelBuilder.Entity<VirtualCard>().Property(card => card.Expiry).HasMaxLength(10);
             modelBuilder.Entity<VirtualCard>().HasIndex(card => card.CardNumber).IsUnique();
             modelBuilder.Entity<VirtualCard>().HasIndex(card => new { card.UserId, card.IsActive });
         }
